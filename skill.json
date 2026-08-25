@@ -1,0 +1,14 @@
+{
+  "name": "BusinessCompiler",
+  "description": "Ultimate AI‑native Business Compiler: given a business category, it automatically discovers the business DNA, builds a universal ontology, creates a formal Business Intermediate Representation (BIR), compiles a complete data model, executable workflows, responsive UI forms, KPI dashboards, a hierarchy of specialized AI agents, automations, security policies (RBAC/ABAC), integrations, simulation & forecasting engines, knowledge‑graph enrichment, and a local‑first sync plan. Outputs a ready‑to‑deploy specification (JSON/YAML) and a step‑by‑step deployment guide. The compiler is domain‑aware (plant nursery, laundry, car‑wash, SaaS, health‑clinic, urban farm, etc.) and can generate code‑ready artifacts, documentation, and test suites.",
+
+  "examples": [
+    "/business-compiler Plant nursery – full plant‑inventory, watering schedules, sales, subscriptions and AI‑driven stock forecasts",
+    "/business-compiler Multi‑branch laundry management with inventory, pickup/delivery, employees, accounting, CRM, automation and AI",
+    "/business-compiler Car wash business with vehicle types, wash packages, service bays, technician queues, IoT sensor integration and profitability simulation",
+    "/business-compiler Subscription‑based SaaS platform with customer billing, tiered pricing, usage metering, upgrade workflows and revenue forecasting",
+    "/business-compiler Urban farm vertical‑hydroponics system with crop cycles, resource tracking, worker shifts, financial KPIs and climate‑control automation",
+    "/business-compiler Health clinic with patient intake, appointments, billing, inventory of medical supplies, compliance rules and AI triage agent",
+    "/business-compiler /include‑sections DataModel,Workflow,UI,Agents,Simulation to get only the requested parts"
+  ]
+}
