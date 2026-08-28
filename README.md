@@ -3,10 +3,13 @@
 A Claude skill that compiles a business idea or category into a complete, ready-to-deploy
 business operating system: data model, workflows, UI/dashboards, analytics, an AI agent
 workforce with a strategic reasoning layer, automations and reminders, WhatsApp integration, a
-social media suite, marketing, a full CRM, native accounting, inventory, HR/payroll, a
-knowledge base, integrations with any third-party platform, security, and simulation/
-forecasting — all generated from one consistent shared model so nothing contradicts anything
-else.
+social media suite, marketing, a full CRM, native accounting, inventory, HR/payroll,
+asset/equipment tracking with IoT and predictive maintenance, a knowledge base, integrations
+with any third-party platform, this business's own outbound API/webhook platform for other
+systems to integrate into it, security, simulation/forecasting, and a final comprehensive QA
+pass — all generated from one consistent shared model so nothing contradicts anything else,
+and written into the same clustered directory structure every time (see "Output shape" below)
+so the result reads as one cohesive product no matter the business niche.
 
 ## Using it
 
@@ -20,6 +23,24 @@ e.g. `/business-compiler Multi-branch laundry with pickup/delivery, employees, a
 
 Add `/include-sections A,B,C` to compile only specific sections — see the Section Catalog in
 `SKILL.md` for the full list of names.
+
+## Output shape
+
+Every full compile produces the same clustered directory layout regardless of business niche
+— see SKILL.md's "Output Package Structure" for the full spec:
+
+```
+<business-slug>/
+├── 00-index.md         — executive summary + table of contents, written last
+├── bir.json             — the machine-readable root every section compiles from
+├── 01-foundation/        — data model, dashboards, security
+├── 02-intelligence/      — analytics, views, AI agents, simulation
+├── 03-operations/        — automations, inventory, assets/IoT, HR
+├── 04-growth/            — WhatsApp, social media, marketing, CRM
+├── 05-finance/           — accounting
+├── 06-platform/          — knowledge base, integrations, API/webhooks
+└── 07-delivery/          — deployment guide, qa-report.md
+```
 
 ## How it's built
 

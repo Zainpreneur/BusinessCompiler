@@ -8,6 +8,10 @@ reasoning, automations, WhatsApp, analytics, views, social, marketing, knowledge
 integrations. The full compile would also include the data model, UI/dashboards, security,
 simulation, and deployment guide files, omitted here for length.
 
+A real full compile would write these into the clustered Output Package Structure from
+SKILL.md (`01-foundation/`, `02-intelligence/`, etc., with `00-index.md` at the root) — this
+excerpt inlines everything in one file purely for readability here.
+
 ## BIR meta (excerpt)
 
 ```json
@@ -95,6 +99,25 @@ simulation, and deployment guide files, omitted here for length.
 
 - Compensation: hourly wage for bay staff, small per-order piece-rate bonus for drivers.
 - Payroll cadence: biweekly. Pipeline: sum `Shift` hours + piece-rate from `LaundryOrder.driverId` → apply CA withholding → post to `5000 Payroll Expense` → disburse via Stripe payouts.
+
+## Assets & IoT (excerpt)
+
+- Asset types: wash-and-fold machines, dryers, delivery vans. Maintenance: dryers serviced every 90 days or 2,000 cycles, whichever first.
+- IoT: vibration + temperature sensors on the 6 largest machines (branch 1 and 2 only — payback doesn't justify it at branch 3's volume yet). Predictive-maintenance agent flags a machine trending toward bearing failure and auto-creates a `MaintenanceOrder`, pulling the replacement part from `18-inventory-supply-chain.md` stock if in hand, else generating a `PurchaseOrder`.
+
+## Platform API & Webhooks (excerpt)
+
+- Exposed entities: `LaundryOrder` (read, create), `Customer` (read, create), `Stock` (read). Not exposed: `JournalEntry`, `Employee`.
+- Auth: API keys per corporate-contract partner (hotels/gyms from the CRM pipeline), scoped to `scopes.orders-readwrite` which maps to the `branch-manager` RBAC role's permissions — a hotel partner's key can only see and create orders for its own linked branch.
+- Webhook `order.ready-for-pickup`: fires on `LaundryOrder: quality-check -> ready`, payload `{orderId, branchId, readyAt}`, HMAC-signed, retried 3x with backoff.
+
+## AI Operations (excerpt)
+
+- `system-health-agent` (advisor): weekly report shows `whatsapp-concierge` escalating 34% of conversations to `branch-manager` — above the 20% target — traced to low confidence on reschedule requests during the two weeks a new pricing promo ran; recommends adding promo-specific FAQ content to the knowledge base rather than lowering the confidence threshold.
+
+## QA (excerpt)
+
+`07-delivery/qa-report.md` would flag, for example: "⚠️ Business logic: `LaundryOrder` state `quality-check` had no outgoing transition to `ready` defined in the first draft — fixed, transition added, trigger `qc-passed`." — the kind of gap Stage 4 exists to catch before the compile is called done.
 
 ## Automations (excerpt)
 

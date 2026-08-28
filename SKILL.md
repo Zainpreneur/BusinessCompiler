@@ -1,6 +1,6 @@
 ---
 name: business-compiler
-description: Compiles any business idea or category into a complete, ready-to-deploy business operating system — data model, workflows, UI/dashboards, advanced multi-dimensional analytics and per-audience views, an AI agent workforce with a strategic reasoning layer, an automation/reminder engine, WhatsApp Business integration, a social-media marketing suite, advanced marketing (ads, A/B testing, multi-touch attribution, drip sequences), a full CRM (sales pipeline, lead scoring, support ticketing/SLAs, customer-360), native double-entry accounting & finance (chart of accounts, ledger, multi-currency, tax, budgets, period close), inventory & supply chain, HR & payroll, a knowledge base/document module, generic integrations with any third-party platform, RBAC/ABAC security, and a simulation/forecasting layer. Use this skill whenever the user describes a business, startup idea, or operational process (a shop, clinic, agency, SaaS, farm, restaurant, service business, franchise, etc.) and wants it turned into a system, a spec, an app, an ERP, a plan to build one, "how would I run/automate this," or wants business analytics, reporting, dashboards, accounting, CRM, or an AI advisor for a business. Trigger even if they don't say "business compiler" explicitly — phrases like "I'm opening a...", "help me set up systems for my...", "I want to automate my business", "build me an ERP/CRM for...", or "/business-compiler" all qualify.
+description: Compiles any business idea or category into a complete, ready-to-deploy business operating system — data model, workflows, UI/dashboards, advanced multi-dimensional analytics and per-audience views, an AI agent workforce with a strategic reasoning layer (plus a voice/omnichannel agent and a system-health meta-agent), an automation/reminder engine, WhatsApp Business integration, a social-media marketing suite, advanced marketing (ads, A/B testing, multi-touch attribution, drip sequences), a full CRM (sales pipeline, lead scoring, support ticketing/SLAs, customer-360), native double-entry accounting & finance (chart of accounts, ledger, multi-currency, tax, budgets, period close), inventory & supply chain, HR & payroll, asset/equipment tracking with IoT and predictive maintenance, a knowledge base/document module, generic integrations with any third-party platform PLUS the business's own outbound API and webhook platform for other systems to integrate into it, RBAC/ABAC security, a simulation/forecasting layer, and a final comprehensive QA pass that checks business logic, AI logic, and cross-module consistency before the compile is called done. Use this skill whenever the user describes a business, startup idea, or operational process (a shop, clinic, agency, SaaS, farm, restaurant, service business, franchise, etc.) and wants it turned into a system, a spec, an app, an ERP, a plan to build one, "how would I run/automate this," or wants business analytics, reporting, dashboards, accounting, CRM, an API, or an AI advisor for a business. Trigger even if they don't say "business compiler" explicitly — phrases like "I'm opening a...", "help me set up systems for my...", "I want to automate my business", "build me an ERP/CRM for...", or "/business-compiler" all qualify.
 ---
 
 # Business Compiler
@@ -33,9 +33,11 @@ for a narrow question.
 
 ## The Compilation Pipeline
 
-Work through these stages in order. Stages 1–3 build the shared model everything else reads
+Work through these stages in order. Stages 1–2 build the shared model everything else reads
 from; do not skip to section generation before you have a BIR, or the sections will drift out
 of sync with each other (e.g. an AI agent referencing a field the data model doesn't have).
+Stage 4 is not optional for a full compile — it's what keeps this a system that was actually
+checked, not just a large pile of plausible-looking Markdown.
 
 ### Stage 1 — Discover the Business DNA
 
@@ -62,36 +64,123 @@ matching reference file and produce that section from the BIR. The reference fil
 the detailed patterns, checklists, and worked structures — SKILL.md intentionally does not
 duplicate them here.
 
+### Stage 4 — Comprehensive QA
+
+For a full compile (not narrowed by `/include-sections` to something trivial), read
+`references/22-qa-and-completeness.md` and walk every compiled section back through its
+checklist: business logic (dead-end states, unbacked KPIs, numbers that disagree across
+modules), AI logic (every agent complete and guardrailed, no unchecked authority over
+irreversible actions), integration/API/security logic, and coverage against what the user
+actually asked for. Fix what you find; write `07-delivery/qa-report.md` documenting the pass.
+Then run `python3 scripts/validate_bir.py <output-dir>/bir.json` as the mechanical half of
+this stage — it catches broken cross-references and a few structural issues (duplicate IDs,
+dead-end states) that Stage 4's manual checklist would otherwise have to catch by hand. Fix
+anything it reports as an error; warnings are worth a glance but not blocking. Only present the
+compile as finished once both halves of this stage are done and `00-index.md` is written.
+
 ## Section Catalog
 
-| # | Section | Reference file | What it produces |
-|---|---------|-----------------|-------------------|
-| 1 | Data Model & Workflows | `references/02-data-model-workflows.md` | Entities, fields, relations, state machines, executable business workflows |
-| 2 | UI & Dashboards | `references/03-ui-dashboards.md` | Responsive forms, views, and live KPI dashboards per role |
-| 3 | Analytics & Reporting | `references/13-analytics-and-reporting.md` | Multi-dimensional reporting cube, financial statements, cohort/retention analysis, benchmarking, anomaly detection, a business health score |
-| 4 | Business Views | `references/14-business-views.md` | Per-audience bundles (Executive, Operations, Financial, CRM, Team, Growth, Technical/diagrams, Board, Field) with cadence and medium |
-| 5 | AI Agents & Reasoning | `references/04-ai-agents.md` | An AI agent hierarchy (orchestrator/advisor/specialist/task) with tools, triggers, guardrails, and a strategic business-reasoning layer (structured decision frameworks, not just task execution) |
-| 6 | Automations & Reminders | `references/05-automations-reminders.md` | Event→condition→action automation engine, scheduled reminders, escalation chains |
-| 7 | WhatsApp Integration | `references/06-whatsapp-integration.md` | WhatsApp Business API setup, message templates, conversational flows, opt-in/consent |
-| 8 | Social Media Suite | `references/07-social-media-suite.md` | Multi-platform content calendar, publishing, listening, analytics |
-| 9 | Marketing | `references/08-marketing-crm.md` | Segmentation, funnels, campaigns, lifecycle drip sequences, paid ads, A/B testing, multi-touch attribution, loyalty, referral |
-| 10 | CRM: Sales Pipeline & Support | `references/17-crm-sales-support.md` | Deal/pipeline stages, lead scoring, support ticketing with SLAs, customer-360 view |
-| 11 | Accounting & Finance | `references/16-accounting-finance.md` | Chart of accounts, double-entry ledger auto-posted from workflows, multi-currency, tax, banking/reconciliation, budgets, period close |
-| 12 | Inventory & Supply Chain | `references/18-inventory-supply-chain.md` | Stock tracking, warehouses, purchase orders, suppliers, reorder policy, transfers, shrinkage |
-| 13 | HR & Payroll | `references/19-hr-payroll.md` | Employee lifecycle, scheduling, compensation/payroll pipeline, leave, performance |
-| 14 | Knowledge Base & Documents | `references/15-knowledge-and-documents.md` | Document templates (invoices, contracts, SOPs), a knowledge base that grounds customer-facing agents |
-| 15 | Integrations Framework | `references/09-integrations-framework.md` | Generic "connect to any platform" connector spec (payments, accounting, maps, e-commerce, calendars, etc.) |
-| 16 | Security | `references/10-security-rbac-abac.md` | Roles, permissions, attribute-based policies, audit, compliance notes |
-| 17 | Simulation & Forecasting | `references/11-simulation-forecasting.md` | Demand/cashflow/staffing simulators, forecasting models, what-if scenarios |
-| 18 | Deployment Guide | `references/12-deployment-guide.md` | Step-by-step path from spec to running system, stack choices, rollout plan |
+Every section belongs to one of seven clusters — this is also the compilation order within
+Stage 3, and it's the same grouping the Output Package Structure below turns into real
+directories, so "what cluster is this in" answers both "when do I compile it" and "where does
+it live" at once.
 
-Sections 3–14 are the "exhaustive AI / analytics / automation / operations" layer the
-compiler is known for — never skip these by default even for a simple-sounding business; a
-one-location laundromat still benefits from a reminder agent, a WhatsApp pickup-ready
-notification, a real ledger instead of a shoebox of receipts, and a weekly owner digest.
-Sections 11–13 (Accounting, Inventory, HR) should be skipped or minimized when they genuinely
-don't apply — a single-founder SaaS has no inventory and no payroll; say so rather than
-padding the output.
+| Cluster | Section | Reference file | Output file | What it produces |
+|---|---|---|---|---|
+| **Foundation** | Data Model & Workflows | `references/02-data-model-workflows.md` | `01-foundation/data-model.md` | Entities, fields, relations, state machines, executable business workflows |
+| **Foundation** | UI & Dashboards | `references/03-ui-dashboards.md` | `01-foundation/dashboards.md` | Responsive forms, views, and live KPI dashboards per role |
+| **Foundation** | Security | `references/10-security-rbac-abac.md` | `01-foundation/security.md` | Roles, permissions, attribute-based policies, audit, compliance notes |
+| **Intelligence** | Analytics & Reporting | `references/13-analytics-and-reporting.md` | `02-intelligence/analytics.md` | Multi-dimensional reporting cube, financial statements, cohort/retention analysis, benchmarking, anomaly detection, a business health score |
+| **Intelligence** | Business Views | `references/14-business-views.md` | `02-intelligence/views.md` | Per-audience bundles (Executive, Operations, Financial, CRM, Team, Growth, Technical/diagrams, Board, Field) with cadence and medium |
+| **Intelligence** | AI Agents & Reasoning | `references/04-ai-agents.md` | `02-intelligence/ai-agents.md` | An AI agent hierarchy (orchestrator/advisor/specialist/task) with tools, triggers, guardrails, a strategic reasoning layer, and a system-health meta-agent |
+| **Intelligence** | Simulation & Forecasting | `references/11-simulation-forecasting.md` | `02-intelligence/simulation.md` | Demand/cashflow/staffing simulators, forecasting models, what-if scenarios |
+| **Operations** | Automations & Reminders | `references/05-automations-reminders.md` | `03-operations/automations.md` | Event→condition→action automation engine, scheduled reminders, escalation chains |
+| **Operations** | Inventory & Supply Chain | `references/18-inventory-supply-chain.md` | `03-operations/inventory.md` | Stock tracking, warehouses, purchase orders, suppliers, reorder policy, transfers, shrinkage |
+| **Operations** | Assets, Equipment & IoT | `references/21-assets-equipment-iot.md` | `03-operations/assets-iot.md` | Asset registry, preventive maintenance, IoT telemetry, a predictive-maintenance agent |
+| **Operations** | HR & Payroll | `references/19-hr-payroll.md` | `03-operations/hr.md` | Employee lifecycle, scheduling, compensation/payroll pipeline, leave, performance |
+| **Growth** | WhatsApp Integration | `references/06-whatsapp-integration.md` | `04-growth/whatsapp.md` | WhatsApp Business API setup, message templates, conversational flows, opt-in/consent |
+| **Growth** | Social Media Suite | `references/07-social-media-suite.md` | `04-growth/social-media.md` | Multi-platform content calendar, publishing, listening, analytics |
+| **Growth** | Marketing | `references/08-marketing-crm.md` | `04-growth/marketing.md` | Segmentation, funnels, campaigns, lifecycle drip sequences, paid ads, A/B testing, multi-touch attribution, loyalty, referral |
+| **Growth** | CRM: Sales Pipeline & Support | `references/17-crm-sales-support.md` | `04-growth/crm.md` | Deal/pipeline stages, lead scoring, support ticketing with SLAs, customer-360 view |
+| **Finance** | Accounting & Finance | `references/16-accounting-finance.md` | `05-finance/accounting.md` | Chart of accounts, double-entry ledger auto-posted from workflows, multi-currency, tax, banking/reconciliation, budgets, period close |
+| **Platform** | Knowledge Base & Documents | `references/15-knowledge-and-documents.md` | `06-platform/knowledge-base.md` | Document templates (invoices, contracts, SOPs), a knowledge base that grounds customer-facing agents |
+| **Platform** | Integrations Framework | `references/09-integrations-framework.md` | `06-platform/integrations.md` | Generic "connect to any platform" connector spec — this business *consuming* other platforms |
+| **Platform** | Platform API & Webhooks | `references/20-api-and-webhooks.md` | `06-platform/api-webhooks.md` | The mirror image of Integrations — this business's own API/webhook surface for *other systems to integrate into it* |
+| **Delivery** | Deployment Guide | `references/12-deployment-guide.md` | `07-delivery/deployment-guide.md` | Step-by-step path from spec to running system, stack choices, rollout plan |
+| **Delivery** | Comprehensive QA (Stage 4, always last) | `references/22-qa-and-completeness.md` | `07-delivery/qa-report.md` | Business/AI-logic/cross-module checklist results and what was fixed |
+
+**Foundation, Intelligence, Operations, and Growth are never skipped by default**, even for a
+simple-sounding business — a one-location laundromat still gets a reminder agent, a WhatsApp
+pickup-ready notification, a real ledger instead of a shoebox of receipts, and a weekly owner
+digest. Within **Operations**, Inventory/Assets-IoT/HR should each be skipped or minimized
+when they genuinely don't apply (a single-founder SaaS has no inventory, no equipment, no
+payroll) — say so rather than padding the output. Within **Platform**, Platform API & Webhooks
+is worth skipping only for a genuinely single-operator business with no plausible third-party
+integrators; **Finance** (native accounting) is worth skipping only when the business has
+firmly committed to an external accounting product instead (see `09-integrations-framework.md`).
+
+## Output Package Structure
+
+A full compile is a small repository, not a folder of loose files — structure it the same way
+every time, for every business, so the shape is instantly familiar whether the business is a
+laundromat or a SaaS platform, and so a future session (this one, on a follow-up, or a fresh
+one working from these files alone) can navigate it without re-reading everything:
+
+```
+<business-slug>/
+├── 00-index.md              — master table of contents + executive summary (see below)
+├── bir.json                 — the BIR: the machine-readable root everything else compiles from
+├── 01-foundation/           — data model, dashboards, security: the base layer everything else depends on
+├── 02-intelligence/         — analytics, views, AI agents, simulation: the business's "brain"
+├── 03-operations/           — automations, inventory, assets/IoT, HR: day-to-day running
+├── 04-growth/               — WhatsApp, social, marketing, CRM: the customer-facing engine
+├── 05-finance/              — accounting: the ledger
+├── 06-platform/             — knowledge base, integrations in, API/webhooks out
+└── 07-delivery/             — deployment guide, qa-report.md
+```
+
+Use the exact cluster folder names above — the consistency is the point; don't rename them
+per business even when a niche term would feel more natural, since a founder or engineer who's
+seen this compiler's output once should recognize the shape immediately on the next one.
+
+### `00-index.md`
+
+The entry point — write this *last*, after every section is compiled and QA'd, so it reflects
+the finished package, not a plan for it. It should let someone (human or AI) understand the
+whole business and find anything in under a minute:
+
+1. **Executive summary**: business name, category, scale, audience, the primary lifecycle from
+   the ontology — 3-5 sentences, no jargon.
+2. **Table of contents**: every output file, grouped by cluster, one line each — the file's
+   path plus a one-sentence description (reuse the "What it produces" column from the Section
+   Catalog, written in this business's actual terms rather than the generic wording).
+3. **Key decisions**: the `meta.assumptions` logged during discovery, so anyone reading later
+   knows what was inferred vs. explicitly stated.
+4. **Status**: the QA pass result (clean, or what was fixed) and the validator output, so the
+   index doubles as a one-glance confidence check on the whole package.
+
+### Standard page template
+
+Every compiled section file (everything under the cluster folders) opens with the same short
+header before its content, so pages read as one cohesive product instead of 20 independently-
+styled documents:
+
+```markdown
+# <Section Title>
+
+*Part of the <Cluster> cluster. Compiled from `bir.json`.*
+
+<1-3 sentences: what was decided for THIS business specifically — not a restatement of what
+the section type generally covers.>
+
+---
+
+<the section's actual content, per that reference file's own Output Format guidance>
+```
+
+Skip further structural ceremony beyond that header — the reference files already specify
+each section's internal format (tables, entity blocks, etc.); this template only standardizes
+the opening so every page starts the same way regardless of which reference file produced it.
 
 ## Cross-Cutting Rules
 
@@ -111,22 +200,18 @@ padding the output.
   `assets/bir-schema.json` and the per-section formats in the reference files, with brief prose
   only to explain non-obvious choices. The user should be able to hand the output to an
   engineering team or feed it back into Claude Code to scaffold real code.
-- **Write files.** For a full compile, write the BIR and each compiled section to files (e.g.
-  a `<business-slug>/` output directory: `bir.json`, `data-model.md`, `dashboards.md`,
-  `analytics.md`, `views.md`, `ai-agents.md`, `automations.md`, `whatsapp.md`,
-  `social-media.md`, `marketing.md`, `crm.md`, `accounting.md`, `inventory.md`, `hr.md`,
-  `knowledge-base.md`, `integrations.md`, `security.md`, `simulation.md`,
-  `deployment-guide.md`) rather than only printing to chat, so the result is a real
-  deliverable — then summarize what was produced and where.
+- **Write files, following the Output Package Structure.** For a full compile, write `bir.json`
+  and every compiled section into the clustered directory layout defined above, finishing with
+  `00-index.md` — rather than only printing to chat, so the result is a real deliverable — then
+  summarize what was produced and where. For a narrowed `/include-sections` compile, still use
+  the matching cluster folder(s) for whatever's produced, so a partial compile slots cleanly
+  into a full one later rather than needing to be reorganized.
 - **Version and iterate.** Treat a follow-up like "add loyalty points" or "make it
   multi-branch" as a recompile of the affected BIR entities and the sections that depend on
   them, not a restart from scratch — re-read the existing output files first if they exist.
-- **Validate before declaring done.** After writing `bir.json` for a full compile, run
-  `python3 scripts/validate_bir.py <output-dir>/bir.json`. It's a dependency-free linter that
-  catches exactly the failure mode the first rule above warns about — an agent, automation, or
-  workflow step referencing an entity/role/agent ID that doesn't actually exist in the BIR.
-  Fix anything it reports as an error before presenting the compile as finished; warnings
-  (naming convention, missing guardrails) are worth a glance but not blocking.
+  Re-run Stage 4 after any recompile, not just after the first full compile — a follow-up
+  change is exactly the kind of edit that can quietly break a cross-reference or a number two
+  modules used to agree on.
 
 ## Worked Example
 

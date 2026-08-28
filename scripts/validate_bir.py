@@ -51,6 +51,19 @@ def check_ref(value, valid_sets, label, errors, allow_namespaces=("entities", "r
     errors.append(f"{label}: '{value}' not found in {', '.join(allow_namespaces)}")
 
 
+def check_duplicates(items: list, label: str, errors: list[str]) -> None:
+    """Flag duplicate IDs within one namespace — two entities silently sharing an ID is a
+    real modeling bug (whichever was compiled second silently wins), not just a style nit."""
+    seen: dict[str, int] = {}
+    for item in items:
+        iid = item.get("id")
+        if iid:
+            seen[iid] = seen.get(iid, 0) + 1
+    for iid, count in seen.items():
+        if count > 1:
+            errors.append(f"Duplicate {label} id '{iid}' used {count} times")
+
+
 def validate(bir: dict):
     errors: list[str] = []
     warnings: list[str] = []
@@ -60,6 +73,13 @@ def validate(bir: dict):
     for key in ("meta", "ontology", "entities", "roles", "workflows"):
         if key not in bir:
             errors.append(f"Missing required top-level key: '{key}'")
+
+    # --- duplicate IDs within each namespace ---
+    check_duplicates(bir.get("entities", []), "entity", errors)
+    check_duplicates(bir.get("roles", []), "role", errors)
+    check_duplicates(bir.get("aiAgents", []), "agent", errors)
+    check_duplicates(bir.get("workflows", []), "workflow", errors)
+    check_duplicates(bir.get("integrations", []), "integration", errors)
 
     # --- naming conventions (warnings only — see references/01-ontology-and-bir.md) ---
     for e in bir.get("entities", []):
@@ -72,6 +92,17 @@ def validate(bir: dict):
                 warnings.append(f"Field id '{eid}.{fid}' is not camelCase")
             if f.get("type") == "relation":
                 check_ref(f.get("relationTo"), ids, f"Entity '{eid}' field '{fid}'.relationTo", errors, ("entities",))
+
+        # dead-end states: every non-terminal state should have an outgoing transition,
+        # or a real business's state machine will have orders that get stuck.
+        states = e.get("states", [])
+        if states:
+            outgoing = {t.get("from") for t in e.get("transitions", [])}
+            for i, s in enumerate(states):
+                is_last = i == len(states) - 1
+                if s not in outgoing and not is_last:
+                    warnings.append(f"Entity '{eid}' state '{s}' has no outgoing transition "
+                                     f"(dead end unless '{s}' is meant to be terminal) — see references/22-qa-and-completeness.md")
 
     for r in bir.get("roles", []):
         rid = r.get("id", "")

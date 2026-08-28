@@ -76,7 +76,9 @@
     "accounting": { "$ref": "#/definitions/accountingConfig" },
     "crm": { "$ref": "#/definitions/crmConfig" },
     "inventory": { "$ref": "#/definitions/inventoryConfig" },
-    "hr": { "$ref": "#/definitions/hrConfig" }
+    "hr": { "$ref": "#/definitions/hrConfig" },
+    "platformApi": { "$ref": "#/definitions/platformApiConfig" },
+    "assets": { "$ref": "#/definitions/assetsConfig" }
   },
   "definitions": {
     "entity": {
@@ -229,7 +231,7 @@
       "required": ["id", "category", "direction"],
       "properties": {
         "id": { "type": "string" },
-        "category": { "type": "string", "enum": ["payments", "accounting", "ecommerce", "calendar", "maps-logistics", "communications", "storage", "analytics", "custom-webhook"] },
+        "category": { "type": "string", "enum": ["payments", "accounting", "ecommerce", "calendar", "maps-logistics", "communications", "storage", "analytics", "iot-telemetry", "custom-webhook"] },
         "direction": { "type": "string", "enum": ["inbound", "outbound", "bidirectional"] },
         "entitiesSynced": { "type": "array", "items": { "type": "string" } },
         "authType": { "type": "string", "enum": ["oauth2", "api-key", "webhook-secret", "basic"] }
@@ -359,6 +361,30 @@
         "leavePolicies": { "type": "array", "items": { "type": "string" } },
         "performanceReviewCadence": { "type": "string" },
         "schedulingEntity": { "type": "string", "description": "BIR entity id representing a shift/schedule assignment." }
+      }
+    },
+    "platformApiConfig": {
+      "type": "object",
+      "description": "The business's own API/webhook surface — how OTHER systems integrate INTO this one, the mirror image of `integrations` (which is this business consuming other platforms).",
+      "properties": {
+        "style": { "type": "string", "enum": ["rest", "graphql", "rest+graphql"] },
+        "exposedEntities": { "type": "array", "items": { "type": "object", "properties": { "entity": { "type": "string" }, "operations": { "type": "array", "items": { "type": "string", "enum": ["read", "create", "update", "delete"] } } } } },
+        "authMethods": { "type": "array", "items": { "type": "string", "enum": ["api-key", "oauth2-client-credentials", "oauth2-authorization-code", "hmac-signed"] } },
+        "scopes": { "type": "array", "items": { "type": "object", "properties": { "id": { "type": "string" }, "mapsToRole": { "type": "string", "description": "RBAC role id from security.roles this scope's permissions mirror." } } } },
+        "webhookEvents": { "type": "array", "items": { "type": "object", "properties": { "id": { "type": "string" }, "sourceEntity": { "type": "string" }, "sourceTransition": { "type": "string", "description": "Entity state transition (from 02-data-model-workflows.md) this event fires on." }, "payloadFields": { "type": "array", "items": { "type": "string" } } } } },
+        "rateLimits": { "type": "string" },
+        "versioningStrategy": { "type": "string" }
+      }
+    },
+    "assetsConfig": {
+      "type": "object",
+      "description": "Physical, non-consumable assets/equipment — distinct from consumable stock in `inventory`.",
+      "properties": {
+        "assetEntity": { "type": "string", "description": "BIR entity id representing a piece of equipment/asset, e.g. 'Asset' or 'Machine'." },
+        "assetTypes": { "type": "array", "items": { "type": "string" } },
+        "maintenanceSchedules": { "type": "array", "items": { "type": "object", "properties": { "assetType": { "type": "string" }, "cadence": { "type": "string" }, "task": { "type": "string" } } } },
+        "iotTelemetry": { "type": "array", "items": { "type": "object", "properties": { "assetType": { "type": "string" }, "signals": { "type": "array", "items": { "type": "string" } }, "integrationId": { "type": "string" } } } },
+        "predictiveMaintenance": { "type": "boolean", "description": "Whether an AI agent predicts failure from telemetry/usage rather than relying on fixed schedules alone." }
       }
     }
   }

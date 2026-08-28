@@ -41,10 +41,20 @@ Draw the agent roster from whichever of these are relevant — most real busines
 5–12 agents/features across these domains:
 
 - **Front-of-house / conversational**: intake triage, appointment booking assistant, FAQ/
-  knowledge-base answering, multilingual support, WhatsApp/chat concierge (see
-  `06-whatsapp-integration.md`).
+  knowledge-base answering, multilingual support (translate outbound messages and understand
+  inbound ones in the customer's language rather than assuming everyone types in the
+  business's default one), WhatsApp/chat concierge (see `06-whatsapp-integration.md`), and a
+  **voice agent** for businesses that still take phone calls — answers or triages inbound
+  calls, transcribes and summarizes them onto the relevant entity (an `Appointment` note, a
+  `Ticket`), and can place outbound calls for anything that genuinely needs a voice (a missed
+  high-value delivery, an overdue-payment call escalated from `whatsapp-concierge`). Treat
+  phone as one more channel into the same customer conversation history as WhatsApp/chat, not
+  a separate silo — a customer who called yesterday and messages today shouldn't have to
+  repeat themselves.
 - **Operations**: demand/staffing forecaster, route/dispatch optimizer, inventory reorder
-  predictor, quality-control anomaly detector (e.g. flagging unusual service times).
+  predictor, quality-control anomaly detector (e.g. flagging unusual service times), and — for
+  any business with tracked equipment — a **predictive-maintenance agent** watching asset
+  telemetry to catch failures before they happen (see `21-assets-equipment-iot.md`).
 - **Finance**: invoice/receipt OCR and reconciliation, collections/dunning agent, fraud/
   anomaly flagging, pricing/discount recommendation.
 - **CRM & retention**: churn-risk scorer, next-best-action recommender, review-response
@@ -135,6 +145,9 @@ in this environment, or custom functions). Reuse these names:
 | `notify_role` | Escalates/alerts a human role without taking further action |
 | `calendar.read` / `calendar.write` | Scheduling, via the calendar integration |
 | `<integration>.sync` | Named third-party sync from `09-integrations-framework.md` |
+| `voice.call` / `voice.transcribe` | Place/receive a phone call, or transcribe+summarize one onto an entity |
+| `iot.read_telemetry` | Reads sensor signals for an `Asset` from `21-assets-equipment-iot.md`'s IoT integration |
+| `agent_metrics.read` | Reads another agent's/automation's run history — used only by the system-health agent below |
 
 Add a business-specific tool only when none of the above fits — and when you do, keep the same
 `noun.verb` naming convention.
@@ -147,6 +160,36 @@ keep: a concierge agent remembering a customer's conversation history within a s
 or the `strategy-advisor` remembering past recommendations so it doesn't contradict itself
 quarter to quarter. State what's remembered and for how long — unbounded, undefined memory is
 a privacy and drift risk, not a feature.
+
+## AI Operations: the system-health agent
+
+An AI workforce that nobody watches degrades silently — an agent's confidence threshold drifts
+out of calibration, an automation starts double-firing, guardrail escalations spike because a
+threshold was set wrong at compile time. Rather than leaving that to be discovered by an
+angry customer, compile a `system-health-agent` (tier: `advisor`, reports to the
+orchestrator if one exists) for any business with more than a handful of agents/automations
+(roughly: worth adding once the roster passes ~4-5 agents).
+
+It doesn't touch customers or transactional entities at all — its only inputs are the AI
+workforce's own operational data: agent escalation rates (an agent escalating on 60% of
+invocations is either miscalibrated or doing a job that shouldn't be autonomous yet),
+automation failure/retry rates, how often each anomaly rule from
+`13-analytics-and-reporting.md` fires (a rule that never fires might be miscalibrated too
+loose; one that fires constantly has become noise everyone ignores), and whether the
+anti-spam/stacking rule from `05-automations-reminders.md` is actually holding (are customers
+getting multiple messages for one event despite the rule saying they shouldn't).
+
+Output: a recurring **AI system health report** (weekly is a reasonable default cadence) —
+surfaced on the Executive View (`14-business-views.md`) — naming what's healthy, what's
+drifting, and a concrete suggested fix per issue (raise/lower a specific threshold, retire an
+agent nobody's escalations justify, fix a stacking automation). It recommends, it doesn't
+self-modify — like any advisor, tuning an agent's guardrails is a human decision, routed to
+`escalatesTo`, not something it does to itself.
+
+This is also the mechanism that keeps the QA pass in `22-qa-and-completeness.md` honest over
+time: that pass checks the compile is logically sound *at compile time*; the system-health
+agent is what catches logic that was sound at compile time but has drifted since, once the
+system has been running against real data.
 
 ## Output format
 
