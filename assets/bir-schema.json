@@ -1,0 +1,241 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://businesscompiler/bir-schema.json",
+  "title": "Business Intermediate Representation (BIR)",
+  "description": "The shared model every compiled section is generated from. One BIR document per compiled business. IDs introduced here (entity names, role names, workflow names) are the vocabulary every downstream section must reuse verbatim.",
+  "type": "object",
+  "required": ["meta", "ontology", "entities", "roles", "workflows"],
+  "properties": {
+    "meta": {
+      "type": "object",
+      "required": ["businessName", "category", "scale", "version", "compiledAt"],
+      "properties": {
+        "businessName": { "type": "string" },
+        "category": { "type": "string", "description": "e.g. 'multi-branch laundry', 'car wash', 'health clinic'" },
+        "scale": { "type": "string", "enum": ["solo", "small-team", "single-location", "multi-location", "franchise", "enterprise"] },
+        "audience": { "type": "string", "enum": ["B2C", "B2B", "B2B2C", "marketplace"] },
+        "assumptions": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Defaults inferred during discovery instead of asked as questions."
+        },
+        "version": { "type": "string", "description": "Semantic version of this BIR, bumped on recompile." },
+        "compiledAt": { "type": "string", "format": "date-time" }
+      }
+    },
+    "ontology": {
+      "type": "object",
+      "description": "The universal business concepts this instance maps domain terms onto.",
+      "properties": {
+        "coreObjects": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Universal nouns every business has, mapped to domain terms, e.g. Customer->Patient, Order->WashJob."
+        },
+        "valueFlow": { "type": "string", "description": "One-sentence description of how money/value moves through the business." },
+        "primaryLifecycle": { "type": "string", "description": "The one workflow that IS the business, e.g. Intake->Fulfill->Bill->Collect." }
+      }
+    },
+    "entities": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/entity" }
+    },
+    "roles": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/role" }
+    },
+    "workflows": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/workflow" }
+    },
+    "kpis": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "formula"],
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "formula": { "type": "string" },
+          "targetRoles": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "aiAgents": { "type": "array", "items": { "$ref": "#/definitions/aiAgent" } },
+    "automations": { "type": "array", "items": { "$ref": "#/definitions/automation" } },
+    "reminders": { "type": "array", "items": { "$ref": "#/definitions/reminderRule" } },
+    "whatsapp": { "$ref": "#/definitions/whatsappConfig" },
+    "socialMedia": { "$ref": "#/definitions/socialMediaConfig" },
+    "marketing": { "$ref": "#/definitions/marketingConfig" },
+    "integrations": { "type": "array", "items": { "$ref": "#/definitions/integration" } },
+    "security": { "$ref": "#/definitions/securityModel" },
+    "simulation": { "$ref": "#/definitions/simulationConfig" }
+  },
+  "definitions": {
+    "entity": {
+      "type": "object",
+      "required": ["id", "name", "fields"],
+      "properties": {
+        "id": { "type": "string", "description": "PascalCase stable identifier, e.g. 'Appointment'." },
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "fields": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "type"],
+            "properties": {
+              "id": { "type": "string" },
+              "type": { "type": "string", "enum": ["string", "number", "boolean", "date", "datetime", "enum", "relation", "money", "geo", "file", "json"] },
+              "enumValues": { "type": "array", "items": { "type": "string" } },
+              "relationTo": { "type": "string", "description": "Entity id this relation points to." },
+              "required": { "type": "boolean" },
+              "piiOrSensitive": { "type": "boolean" }
+            }
+          }
+        },
+        "states": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "If this entity has a lifecycle state machine, its states in order."
+        },
+        "transitions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "from": { "type": "string" },
+              "to": { "type": "string" },
+              "trigger": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "role": {
+      "type": "object",
+      "required": ["id", "name"],
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "isCustomerFacing": { "type": "boolean" },
+        "isHuman": { "type": "boolean", "description": "false for pure AI-agent roles." }
+      }
+    },
+    "workflow": {
+      "type": "object",
+      "required": ["id", "name", "steps"],
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "trigger": { "type": "string" },
+        "steps": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "actor": { "type": "string", "description": "Role id or AI agent id responsible." },
+              "action": { "type": "string" },
+              "entity": { "type": "string" },
+              "onFailure": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "aiAgent": {
+      "type": "object",
+      "required": ["id", "name", "purpose", "tools"],
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "purpose": { "type": "string" },
+        "tier": { "type": "string", "enum": ["orchestrator", "specialist", "task"] },
+        "reportsTo": { "type": "string", "description": "Agent id of the orchestrator, if any." },
+        "tools": { "type": "array", "items": { "type": "string" } },
+        "triggers": { "type": "array", "items": { "type": "string" } },
+        "entitiesTouched": { "type": "array", "items": { "type": "string" } },
+        "guardrails": { "type": "array", "items": { "type": "string" } },
+        "escalatesTo": { "type": "string", "description": "Role id of the human who gets escalations." }
+      }
+    },
+    "automation": {
+      "type": "object",
+      "required": ["id", "trigger", "action"],
+      "properties": {
+        "id": { "type": "string" },
+        "trigger": { "type": "object", "properties": { "event": { "type": "string" }, "entity": { "type": "string" } } },
+        "condition": { "type": "string" },
+        "action": { "type": "object", "properties": { "type": { "type": "string" }, "params": { "type": "object" } } },
+        "owner": { "type": "string", "description": "Role or agent id that owns/monitors this automation." }
+      }
+    },
+    "reminderRule": {
+      "type": "object",
+      "required": ["id", "entity", "offset", "channel"],
+      "properties": {
+        "id": { "type": "string" },
+        "entity": { "type": "string" },
+        "offset": { "type": "string", "description": "e.g. '-2h', '+1d', 'RRULE:FREQ=WEEKLY'." },
+        "channel": { "type": "string", "enum": ["whatsapp", "sms", "email", "push", "call-agent"] },
+        "escalation": { "type": "array", "items": { "type": "string" }, "description": "Ordered fallback channels/roles if unanswered." }
+      }
+    },
+    "whatsappConfig": {
+      "type": "object",
+      "properties": {
+        "useCases": { "type": "array", "items": { "type": "string" } },
+        "templates": { "type": "array", "items": { "type": "object", "properties": { "id": { "type": "string" }, "category": { "type": "string" }, "variables": { "type": "array", "items": { "type": "string" } } } } },
+        "flows": { "type": "array", "items": { "type": "string" } },
+        "consentEntity": { "type": "string" }
+      }
+    },
+    "socialMediaConfig": {
+      "type": "object",
+      "properties": {
+        "platforms": { "type": "array", "items": { "type": "string" } },
+        "contentPillars": { "type": "array", "items": { "type": "string" } },
+        "postingCadence": { "type": "string" },
+        "listeningKeywords": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "marketingConfig": {
+      "type": "object",
+      "properties": {
+        "segments": { "type": "array", "items": { "type": "string" } },
+        "funnels": { "type": "array", "items": { "type": "string" } },
+        "campaigns": { "type": "array", "items": { "type": "string" } },
+        "loyalty": { "type": "object" }
+      }
+    },
+    "integration": {
+      "type": "object",
+      "required": ["id", "category", "direction"],
+      "properties": {
+        "id": { "type": "string" },
+        "category": { "type": "string", "enum": ["payments", "accounting", "ecommerce", "calendar", "maps-logistics", "communications", "storage", "analytics", "custom-webhook"] },
+        "direction": { "type": "string", "enum": ["inbound", "outbound", "bidirectional"] },
+        "entitiesSynced": { "type": "array", "items": { "type": "string" } },
+        "authType": { "type": "string", "enum": ["oauth2", "api-key", "webhook-secret", "basic"] }
+      }
+    },
+    "securityModel": {
+      "type": "object",
+      "properties": {
+        "roles": { "type": "array", "items": { "type": "string" } },
+        "permissions": { "type": "array", "items": { "type": "object", "properties": { "role": { "type": "string" }, "entity": { "type": "string" }, "actions": { "type": "array", "items": { "type": "string" } } } } },
+        "abacPolicies": { "type": "array", "items": { "type": "string" } },
+        "complianceNotes": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "simulationConfig": {
+      "type": "object",
+      "properties": {
+        "models": { "type": "array", "items": { "type": "string" } },
+        "scenarios": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  }
+}
