@@ -1,0 +1,418 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://businesscompiler/bir-schema.json",
+  "title": "Business Intermediate Representation (BIR)",
+  "description": "The shared model every compiled section is generated from. One BIR document per compiled business. IDs introduced here (entity names, role names, workflow names) are the vocabulary every downstream section must reuse verbatim.",
+  "type": "object",
+  "required": ["meta", "ontology", "entities", "roles", "workflows"],
+  "properties": {
+    "meta": {
+      "type": "object",
+      "required": ["businessName", "category", "scale", "version", "compiledAt"],
+      "properties": {
+        "businessName": { "type": "string" },
+        "category": { "type": "string", "description": "e.g. 'multi-branch laundry', 'car wash', 'health clinic'" },
+        "scale": { "type": "string", "enum": ["solo", "small-team", "single-location", "multi-location", "franchise", "enterprise"] },
+        "audience": { "type": "string", "enum": ["B2C", "B2B", "B2B2C", "marketplace"] },
+        "assumptions": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Defaults inferred during discovery instead of asked as questions."
+        },
+        "version": { "type": "string", "description": "Semantic version of this BIR, bumped on recompile." },
+        "compiledAt": { "type": "string", "format": "date-time" }
+      }
+    },
+    "ontology": {
+      "type": "object",
+      "description": "The universal business concepts this instance maps domain terms onto.",
+      "properties": {
+        "coreObjects": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Universal nouns every business has, mapped to domain terms, e.g. Customer->Patient, Order->WashJob."
+        },
+        "valueFlow": { "type": "string", "description": "One-sentence description of how money/value moves through the business." },
+        "primaryLifecycle": { "type": "string", "description": "The one workflow that IS the business, e.g. Intake->Fulfill->Bill->Collect." }
+      }
+    },
+    "entities": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/entity" }
+    },
+    "roles": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/role" }
+    },
+    "workflows": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/workflow" }
+    },
+    "kpis": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "formula"],
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "formula": { "type": "string" },
+          "targetRoles": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "aiAgents": { "type": "array", "items": { "$ref": "#/definitions/aiAgent" } },
+    "automations": { "type": "array", "items": { "$ref": "#/definitions/automation" } },
+    "reminders": { "type": "array", "items": { "$ref": "#/definitions/reminderRule" } },
+    "whatsapp": { "$ref": "#/definitions/whatsappConfig" },
+    "socialMedia": { "$ref": "#/definitions/socialMediaConfig" },
+    "marketing": { "$ref": "#/definitions/marketingConfig" },
+    "integrations": { "type": "array", "items": { "$ref": "#/definitions/integration" } },
+    "security": { "$ref": "#/definitions/securityModel" },
+    "simulation": { "$ref": "#/definitions/simulationConfig" },
+    "analytics": { "$ref": "#/definitions/analyticsConfig" },
+    "views": { "type": "array", "items": { "$ref": "#/definitions/view" } },
+    "knowledgeBase": { "$ref": "#/definitions/knowledgeBaseConfig" },
+    "accounting": { "$ref": "#/definitions/accountingConfig" },
+    "crm": { "$ref": "#/definitions/crmConfig" },
+    "inventory": { "$ref": "#/definitions/inventoryConfig" },
+    "hr": { "$ref": "#/definitions/hrConfig" },
+    "platformApi": { "$ref": "#/definitions/platformApiConfig" },
+    "assets": { "$ref": "#/definitions/assetsConfig" }
+  },
+  "definitions": {
+    "entity": {
+      "type": "object",
+      "required": ["id", "name", "fields"],
+      "properties": {
+        "id": { "type": "string", "description": "PascalCase stable identifier, e.g. 'Appointment'." },
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "fields": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "type"],
+            "properties": {
+              "id": { "type": "string" },
+              "type": { "type": "string", "enum": ["string", "number", "boolean", "date", "datetime", "enum", "relation", "money", "geo", "file", "json"] },
+              "enumValues": { "type": "array", "items": { "type": "string" } },
+              "relationTo": { "type": "string", "description": "Entity id this relation points to." },
+              "required": { "type": "boolean" },
+              "piiOrSensitive": { "type": "boolean" }
+            }
+          }
+        },
+        "states": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "If this entity has a lifecycle state machine, its states in order."
+        },
+        "transitions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "from": { "type": "string" },
+              "to": { "type": "string" },
+              "trigger": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "role": {
+      "type": "object",
+      "required": ["id", "name"],
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "isCustomerFacing": { "type": "boolean" },
+        "isHuman": { "type": "boolean", "description": "false for pure AI-agent roles." }
+      }
+    },
+    "workflow": {
+      "type": "object",
+      "required": ["id", "name", "steps"],
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "trigger": { "type": "string" },
+        "steps": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "actor": { "type": "string", "description": "Role id or AI agent id responsible." },
+              "action": { "type": "string" },
+              "entity": { "type": "string" },
+              "onFailure": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "aiAgent": {
+      "type": "object",
+      "required": ["id", "name", "purpose", "tools"],
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "purpose": { "type": "string" },
+        "tier": { "type": "string", "enum": ["orchestrator", "advisor", "specialist", "task"], "description": "'advisor' agents do multi-step business reasoning (strategy, market research) rather than executing transactional work." },
+        "reportsTo": { "type": "string", "description": "Agent id of the orchestrator, if any." },
+        "tools": { "type": "array", "items": { "type": "string" }, "description": "Reuse the standard tool vocabulary from references/04-ai-agents.md (e.g. web_search, financial_model, document_generator) so tool names stay comparable across agents." },
+        "reasoningPatterns": { "type": "array", "items": { "type": "string" }, "description": "Named structured-reasoning frameworks this agent applies, e.g. 'unit-economics', 'scenario-comparison', 'root-cause-5-whys' — see references/04-ai-agents.md." },
+        "memory": { "type": "string", "description": "What this agent remembers across invocations, if anything, e.g. 'per-customer conversation history, 90 days.' Omit for stateless agents." },
+        "triggers": { "type": "array", "items": { "type": "string" } },
+        "entitiesTouched": { "type": "array", "items": { "type": "string" } },
+        "guardrails": { "type": "array", "items": { "type": "string" } },
+        "escalatesTo": { "type": "string", "description": "Role id of the human who gets escalations." }
+      }
+    },
+    "automation": {
+      "type": "object",
+      "required": ["id", "trigger", "action"],
+      "properties": {
+        "id": { "type": "string" },
+        "trigger": { "type": "object", "properties": { "event": { "type": "string" }, "entity": { "type": "string" } } },
+        "condition": { "type": "string" },
+        "action": { "type": "object", "properties": { "type": { "type": "string" }, "params": { "type": "object" } } },
+        "owner": { "type": "string", "description": "Role or agent id that owns/monitors this automation." }
+      }
+    },
+    "reminderRule": {
+      "type": "object",
+      "required": ["id", "entity", "offset", "channel"],
+      "properties": {
+        "id": { "type": "string" },
+        "entity": { "type": "string" },
+        "offset": { "type": "string", "description": "e.g. '-2h', '+1d', 'RRULE:FREQ=WEEKLY'." },
+        "channel": { "type": "string", "enum": ["whatsapp", "sms", "email", "push", "call-agent"] },
+        "escalation": { "type": "array", "items": { "type": "string" }, "description": "Ordered fallback channels/roles if unanswered." }
+      }
+    },
+    "whatsappConfig": {
+      "type": "object",
+      "properties": {
+        "useCases": { "type": "array", "items": { "type": "string" } },
+        "templates": { "type": "array", "items": { "type": "object", "properties": { "id": { "type": "string" }, "category": { "type": "string" }, "variables": { "type": "array", "items": { "type": "string" } } } } },
+        "flows": { "type": "array", "items": { "type": "string" } },
+        "consentEntity": { "type": "string" }
+      }
+    },
+    "socialMediaConfig": {
+      "type": "object",
+      "properties": {
+        "platforms": { "type": "array", "items": { "type": "string" } },
+        "contentPillars": { "type": "array", "items": { "type": "string" } },
+        "postingCadence": { "type": "string" },
+        "listeningKeywords": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "marketingConfig": {
+      "type": "object",
+      "properties": {
+        "segments": { "type": "array", "items": { "type": "string" } },
+        "funnels": { "type": "array", "items": { "type": "string" } },
+        "campaigns": { "type": "array", "items": { "type": "string" } },
+        "loyalty": { "type": "object" },
+        "referral": { "type": "object" },
+        "adCampaigns": { "type": "array", "items": { "type": "object", "properties": { "id": { "type": "string" }, "platform": { "type": "string" }, "objective": { "type": "string" }, "targetSegment": { "type": "string" }, "budgetModel": { "type": "string" } } } },
+        "abTests": { "type": "array", "items": { "type": "object", "properties": { "id": { "type": "string" }, "hypothesis": { "type": "string" }, "variants": { "type": "array", "items": { "type": "string" } }, "metric": { "type": "string" } } } },
+        "attributionModel": { "type": "string", "enum": ["last-touch", "first-touch", "linear-multi-touch", "position-based"] },
+        "dripSequences": { "type": "array", "items": { "type": "object", "properties": { "id": { "type": "string" }, "trigger": { "type": "string" }, "steps": { "type": "array", "items": { "type": "string" } } } } }
+      }
+    },
+    "integration": {
+      "type": "object",
+      "required": ["id", "category", "direction"],
+      "properties": {
+        "id": { "type": "string" },
+        "category": { "type": "string", "enum": ["payments", "accounting", "ecommerce", "calendar", "maps-logistics", "communications", "storage", "analytics", "iot-telemetry", "custom-webhook"] },
+        "direction": { "type": "string", "enum": ["inbound", "outbound", "bidirectional"] },
+        "entitiesSynced": { "type": "array", "items": { "type": "string" } },
+        "authType": { "type": "string", "enum": ["oauth2", "api-key", "webhook-secret", "basic"] }
+      }
+    },
+    "securityModel": {
+      "type": "object",
+      "properties": {
+        "roles": { "type": "array", "items": { "type": "string" } },
+        "permissions": { "type": "array", "items": { "type": "object", "properties": { "role": { "type": "string" }, "entity": { "type": "string" }, "actions": { "type": "array", "items": { "type": "string" } } } } },
+        "abacPolicies": { "type": "array", "items": { "type": "string" } },
+        "complianceNotes": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "simulationConfig": {
+      "type": "object",
+      "properties": {
+        "models": { "type": "array", "items": { "type": "string" } },
+        "scenarios": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "analyticsConfig": {
+      "type": "object",
+      "properties": {
+        "dimensions": { "type": "array", "items": { "type": "string" }, "description": "Standard cube dimensions this business reports along, e.g. Time, Branch, Channel, Segment, Staff, Product." },
+        "measures": { "type": "array", "items": { "type": "string" }, "description": "Standard measures, e.g. Revenue, Orders, AOV, Margin, Utilization." },
+        "reports": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "measures", "dimensions"],
+            "properties": {
+              "id": { "type": "string" },
+              "name": { "type": "string" },
+              "measures": { "type": "array", "items": { "type": "string" } },
+              "dimensions": { "type": "array", "items": { "type": "string" } },
+              "cadence": { "type": "string", "enum": ["real-time", "daily", "weekly", "monthly", "on-demand"] }
+            }
+          }
+        },
+        "financialStatements": { "type": "array", "items": { "type": "string", "enum": ["profit-and-loss", "cash-flow", "balance-sheet", "ar-aging", "ap-aging"] } },
+        "cohorts": { "type": "array", "items": { "type": "string" } },
+        "healthScore": {
+          "type": "object",
+          "properties": {
+            "components": { "type": "array", "items": { "type": "object", "properties": { "kpi": { "type": "string" }, "weight": { "type": "number" } } } }
+          }
+        },
+        "anomalyRules": { "type": "array", "items": { "type": "string" } },
+        "scheduledDigests": { "type": "array", "items": { "type": "object", "properties": { "id": { "type": "string" }, "audience": { "type": "string" }, "cadence": { "type": "string" }, "channel": { "type": "string" } } } },
+        "externalSources": {
+          "type": "array",
+          "description": "Data pulled in from integrations/the platform API and blended into the analytics cube alongside native BIR data — see references/23-cross-platform-data-aggregation.md.",
+          "items": {
+            "type": "object",
+            "required": ["integrationId", "contributes"],
+            "properties": {
+              "integrationId": { "type": "string", "description": "id from `integrations`, or a `platformApi` webhook/partner source." },
+              "contributes": { "type": "array", "items": { "type": "string" }, "description": "What this source adds to the cube, e.g. 'ad spend', 'impressions', 'GA conversion funnel', 'IoT telemetry trend'." },
+              "joinsToDimensions": { "type": "array", "items": { "type": "string" }, "description": "Which analytics.dimensions this source's data keys against, e.g. Time, Branch, Channel." },
+              "freshness": { "type": "string", "description": "How stale this source can be, e.g. 'synced nightly, up to 24h behind native data'." }
+            }
+          }
+        },
+        "crossSourceAnalyses": {
+          "type": "array",
+          "description": "Analysis only possible by combining 2+ sources (native BIR data plus one or more externalSources) — the payoff of aggregation, not just the plumbing.",
+          "items": {
+            "type": "object",
+            "required": ["id", "sourcesUsed", "answers"],
+            "properties": {
+              "id": { "type": "string" },
+              "sourcesUsed": { "type": "array", "items": { "type": "string" } },
+              "answers": { "type": "string", "description": "The question this analysis actually answers, e.g. 'true blended ROAS across ad platforms vs. attributed revenue'." }
+            }
+          }
+        }
+      }
+    },
+    "view": {
+      "type": "object",
+      "required": ["id", "name", "audience"],
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "audience": { "type": "string", "description": "Role id, or a human label like 'board/investors'." },
+        "cadence": { "type": "string", "enum": ["real-time", "daily", "weekly", "monthly", "on-demand"] },
+        "medium": { "type": "string", "enum": ["in-app", "emailed-report", "whatsapp-digest", "pdf", "diagram"] },
+        "includes": { "type": "array", "items": { "type": "string" }, "description": "IDs of KPIs, reports, dashboards, or diagrams this view bundles." }
+      }
+    },
+    "knowledgeBaseConfig": {
+      "type": "object",
+      "properties": {
+        "documentTypes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "category": { "type": "string", "enum": ["customer-facing", "internal", "knowledge-article"] },
+              "generatedFrom": { "type": "array", "items": { "type": "string" }, "description": "Entity ids whose fields populate this document's template." }
+            }
+          }
+        },
+        "sources": { "type": "array", "items": { "type": "string" }, "description": "Where KB articles live, e.g. integration id of a storage/wiki tool." },
+        "groundsAgents": { "type": "array", "items": { "type": "string" }, "description": "Agent ids that must answer from this KB rather than free-inventing policy." }
+      }
+    },
+    "accountingConfig": {
+      "type": "object",
+      "properties": {
+        "chartOfAccounts": { "type": "array", "items": { "type": "object", "properties": { "code": { "type": "string" }, "name": { "type": "string" }, "type": { "type": "string", "enum": ["asset", "liability", "equity", "revenue", "expense"] } } } },
+        "ledgerEntity": { "type": "string", "description": "BIR entity id used for double-entry journal lines, e.g. 'JournalEntry'." },
+        "baseCurrency": { "type": "string" },
+        "additionalCurrencies": { "type": "array", "items": { "type": "string" } },
+        "taxRules": { "type": "array", "items": { "type": "object", "properties": { "id": { "type": "string" }, "jurisdiction": { "type": "string" }, "rate": { "type": "string" }, "appliesTo": { "type": "string" } } } },
+        "bankAccounts": { "type": "array", "items": { "type": "object", "properties": { "id": { "type": "string" }, "integrationId": { "type": "string" } } } },
+        "budgets": { "type": "array", "items": { "type": "object", "properties": { "id": { "type": "string" }, "period": { "type": "string" }, "scope": { "type": "string" } } } },
+        "closeChecklist": { "type": "array", "items": { "type": "string" }, "description": "Ordered steps for a period-end close." },
+        "payrollLinked": { "type": "boolean", "description": "Whether payroll runs post directly to the ledger." }
+      }
+    },
+    "crmConfig": {
+      "type": "object",
+      "properties": {
+        "pipelineStages": { "type": "array", "items": { "type": "string" }, "description": "Ordered sales pipeline stages, e.g. Lead, Qualified, Proposal, Negotiation, Won, Lost." },
+        "dealEntity": { "type": "string", "description": "BIR entity id representing a sales opportunity/deal." },
+        "quotaModel": { "type": "string", "description": "How sales quotas/targets are set and tracked, per rep or team." },
+        "leadScoring": { "type": "array", "items": { "type": "string" }, "description": "Signals contributing to a lead score, e.g. 'engaged with 3+ WhatsApp messages', 'requested a quote'." },
+        "supportChannels": { "type": "array", "items": { "type": "string" } },
+        "ticketEntity": { "type": "string", "description": "BIR entity id representing a support ticket." },
+        "slaPolicies": { "type": "array", "items": { "type": "object", "properties": { "ticketType": { "type": "string" }, "firstResponse": { "type": "string" }, "resolution": { "type": "string" } } } },
+        "customer360Includes": { "type": "array", "items": { "type": "string" }, "description": "Entity/section ids surfaced on the single-customer aggregate view." }
+      }
+    },
+    "inventoryConfig": {
+      "type": "object",
+      "properties": {
+        "warehouses": { "type": "array", "items": { "type": "string" } },
+        "trackingMethod": { "type": "string", "enum": ["none", "sku-quantity", "lot-batch", "serial-unit"] },
+        "reorderPolicy": { "type": "string", "description": "e.g. 'reorder to 30-day par level when below 7-day supply'." },
+        "purchaseOrderEntity": { "type": "string" },
+        "suppliers": { "type": "array", "items": { "type": "object", "properties": { "id": { "type": "string" }, "name": { "type": "string" }, "leadTimeDays": { "type": "number" } } } },
+        "stockTransfers": { "type": "boolean", "description": "Whether stock moves between locations/branches, requiring a transfer workflow." }
+      }
+    },
+    "hrConfig": {
+      "type": "object",
+      "properties": {
+        "employeeLifecycleStages": { "type": "array", "items": { "type": "string" }, "description": "e.g. Applicant, Hired, Onboarding, Active, On Leave, Offboarded." },
+        "payrollCadence": { "type": "string", "enum": ["weekly", "biweekly", "semimonthly", "monthly"] },
+        "compensationModel": { "type": "array", "items": { "type": "string" }, "description": "e.g. 'hourly wage', 'salary', 'commission on LaundryOrder.total'." },
+        "leavePolicies": { "type": "array", "items": { "type": "string" } },
+        "performanceReviewCadence": { "type": "string" },
+        "schedulingEntity": { "type": "string", "description": "BIR entity id representing a shift/schedule assignment." }
+      }
+    },
+    "platformApiConfig": {
+      "type": "object",
+      "description": "The business's own API/webhook surface — how OTHER systems integrate INTO this one, the mirror image of `integrations` (which is this business consuming other platforms).",
+      "properties": {
+        "style": { "type": "string", "enum": ["rest", "graphql", "rest+graphql"] },
+        "exposedEntities": { "type": "array", "items": { "type": "object", "properties": { "entity": { "type": "string" }, "operations": { "type": "array", "items": { "type": "string", "enum": ["read", "create", "update", "delete"] } } } } },
+        "authMethods": { "type": "array", "items": { "type": "string", "enum": ["api-key", "oauth2-client-credentials", "oauth2-authorization-code", "hmac-signed"] } },
+        "scopes": { "type": "array", "items": { "type": "object", "properties": { "id": { "type": "string" }, "mapsToRole": { "type": "string", "description": "RBAC role id from security.roles this scope's permissions mirror." } } } },
+        "webhookEvents": { "type": "array", "items": { "type": "object", "properties": { "id": { "type": "string" }, "sourceEntity": { "type": "string" }, "sourceTransition": { "type": "string", "description": "Entity state transition (from 02-data-model-workflows.md) this event fires on." }, "payloadFields": { "type": "array", "items": { "type": "string" } } } } },
+        "rateLimits": { "type": "string" },
+        "versioningStrategy": { "type": "string" }
+      }
+    },
+    "assetsConfig": {
+      "type": "object",
+      "description": "Physical, non-consumable assets/equipment — distinct from consumable stock in `inventory`.",
+      "properties": {
+        "assetEntity": { "type": "string", "description": "BIR entity id representing a piece of equipment/asset, e.g. 'Asset' or 'Machine'." },
+        "assetTypes": { "type": "array", "items": { "type": "string" } },
+        "maintenanceSchedules": { "type": "array", "items": { "type": "object", "properties": { "assetType": { "type": "string" }, "cadence": { "type": "string" }, "task": { "type": "string" } } } },
+        "iotTelemetry": { "type": "array", "items": { "type": "object", "properties": { "assetType": { "type": "string" }, "signals": { "type": "array", "items": { "type": "string" } }, "integrationId": { "type": "string" } } } },
+        "predictiveMaintenance": { "type": "boolean", "description": "Whether an AI agent predicts failure from telemetry/usage rather than relying on fixed schedules alone." }
+      }
+    }
+  }
+}
