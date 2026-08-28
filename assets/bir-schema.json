@@ -72,7 +72,11 @@
     "simulation": { "$ref": "#/definitions/simulationConfig" },
     "analytics": { "$ref": "#/definitions/analyticsConfig" },
     "views": { "type": "array", "items": { "$ref": "#/definitions/view" } },
-    "knowledgeBase": { "$ref": "#/definitions/knowledgeBaseConfig" }
+    "knowledgeBase": { "$ref": "#/definitions/knowledgeBaseConfig" },
+    "accounting": { "$ref": "#/definitions/accountingConfig" },
+    "crm": { "$ref": "#/definitions/crmConfig" },
+    "inventory": { "$ref": "#/definitions/inventoryConfig" },
+    "hr": { "$ref": "#/definitions/hrConfig" }
   },
   "definitions": {
     "entity": {
@@ -212,7 +216,12 @@
         "segments": { "type": "array", "items": { "type": "string" } },
         "funnels": { "type": "array", "items": { "type": "string" } },
         "campaigns": { "type": "array", "items": { "type": "string" } },
-        "loyalty": { "type": "object" }
+        "loyalty": { "type": "object" },
+        "referral": { "type": "object" },
+        "adCampaigns": { "type": "array", "items": { "type": "object", "properties": { "id": { "type": "string" }, "platform": { "type": "string" }, "objective": { "type": "string" }, "targetSegment": { "type": "string" }, "budgetModel": { "type": "string" } } } },
+        "abTests": { "type": "array", "items": { "type": "object", "properties": { "id": { "type": "string" }, "hypothesis": { "type": "string" }, "variants": { "type": "array", "items": { "type": "string" } }, "metric": { "type": "string" } } } },
+        "attributionModel": { "type": "string", "enum": ["last-touch", "first-touch", "linear-multi-touch", "position-based"] },
+        "dripSequences": { "type": "array", "items": { "type": "object", "properties": { "id": { "type": "string" }, "trigger": { "type": "string" }, "steps": { "type": "array", "items": { "type": "string" } } } } }
       }
     },
     "integration": {
@@ -301,6 +310,55 @@
         },
         "sources": { "type": "array", "items": { "type": "string" }, "description": "Where KB articles live, e.g. integration id of a storage/wiki tool." },
         "groundsAgents": { "type": "array", "items": { "type": "string" }, "description": "Agent ids that must answer from this KB rather than free-inventing policy." }
+      }
+    },
+    "accountingConfig": {
+      "type": "object",
+      "properties": {
+        "chartOfAccounts": { "type": "array", "items": { "type": "object", "properties": { "code": { "type": "string" }, "name": { "type": "string" }, "type": { "type": "string", "enum": ["asset", "liability", "equity", "revenue", "expense"] } } } },
+        "ledgerEntity": { "type": "string", "description": "BIR entity id used for double-entry journal lines, e.g. 'JournalEntry'." },
+        "baseCurrency": { "type": "string" },
+        "additionalCurrencies": { "type": "array", "items": { "type": "string" } },
+        "taxRules": { "type": "array", "items": { "type": "object", "properties": { "id": { "type": "string" }, "jurisdiction": { "type": "string" }, "rate": { "type": "string" }, "appliesTo": { "type": "string" } } } },
+        "bankAccounts": { "type": "array", "items": { "type": "object", "properties": { "id": { "type": "string" }, "integrationId": { "type": "string" } } } },
+        "budgets": { "type": "array", "items": { "type": "object", "properties": { "id": { "type": "string" }, "period": { "type": "string" }, "scope": { "type": "string" } } } },
+        "closeChecklist": { "type": "array", "items": { "type": "string" }, "description": "Ordered steps for a period-end close." },
+        "payrollLinked": { "type": "boolean", "description": "Whether payroll runs post directly to the ledger." }
+      }
+    },
+    "crmConfig": {
+      "type": "object",
+      "properties": {
+        "pipelineStages": { "type": "array", "items": { "type": "string" }, "description": "Ordered sales pipeline stages, e.g. Lead, Qualified, Proposal, Negotiation, Won, Lost." },
+        "dealEntity": { "type": "string", "description": "BIR entity id representing a sales opportunity/deal." },
+        "quotaModel": { "type": "string", "description": "How sales quotas/targets are set and tracked, per rep or team." },
+        "leadScoring": { "type": "array", "items": { "type": "string" }, "description": "Signals contributing to a lead score, e.g. 'engaged with 3+ WhatsApp messages', 'requested a quote'." },
+        "supportChannels": { "type": "array", "items": { "type": "string" } },
+        "ticketEntity": { "type": "string", "description": "BIR entity id representing a support ticket." },
+        "slaPolicies": { "type": "array", "items": { "type": "object", "properties": { "ticketType": { "type": "string" }, "firstResponse": { "type": "string" }, "resolution": { "type": "string" } } } },
+        "customer360Includes": { "type": "array", "items": { "type": "string" }, "description": "Entity/section ids surfaced on the single-customer aggregate view." }
+      }
+    },
+    "inventoryConfig": {
+      "type": "object",
+      "properties": {
+        "warehouses": { "type": "array", "items": { "type": "string" } },
+        "trackingMethod": { "type": "string", "enum": ["none", "sku-quantity", "lot-batch", "serial-unit"] },
+        "reorderPolicy": { "type": "string", "description": "e.g. 'reorder to 30-day par level when below 7-day supply'." },
+        "purchaseOrderEntity": { "type": "string" },
+        "suppliers": { "type": "array", "items": { "type": "object", "properties": { "id": { "type": "string" }, "name": { "type": "string" }, "leadTimeDays": { "type": "number" } } } },
+        "stockTransfers": { "type": "boolean", "description": "Whether stock moves between locations/branches, requiring a transfer workflow." }
+      }
+    },
+    "hrConfig": {
+      "type": "object",
+      "properties": {
+        "employeeLifecycleStages": { "type": "array", "items": { "type": "string" }, "description": "e.g. Applicant, Hired, Onboarding, Active, On Leave, Offboarded." },
+        "payrollCadence": { "type": "string", "enum": ["weekly", "biweekly", "semimonthly", "monthly"] },
+        "compensationModel": { "type": "array", "items": { "type": "string" }, "description": "e.g. 'hourly wage', 'salary', 'commission on LaundryOrder.total'." },
+        "leavePolicies": { "type": "array", "items": { "type": "string" } },
+        "performanceReviewCadence": { "type": "string" },
+        "schedulingEntity": { "type": "string", "description": "BIR entity id representing a shift/schedule assignment." }
       }
     }
   }

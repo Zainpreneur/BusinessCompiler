@@ -73,6 +73,29 @@ simulation, and deployment guide files, omitted here for length.
 - Document `service-receipt` (customer-facing, generated from `LaundryOrder`+`Invoice`).
 - KB article `stain-policy-faq` grounds `whatsapp-concierge` — the agent must cite this article rather than improvise an answer when a customer disputes a stain-removal result.
 
+## Accounting (excerpt)
+
+- Chart of accounts (partial): `1000 Cash` (asset), `1200 A/R` (asset), `1400 Detergent Inventory` (asset), `4000 Wash Revenue` (revenue), `4100 Dry-Clean Revenue` (revenue), `2000 Supplier Payables` (liability), `5000 Payroll Expense` (expense).
+- Ledger entity: `JournalEntry` — a `LaundryOrder` marked paid auto-posts `Debit 1000 Cash / Credit 4000 Wash Revenue` for the order total, referencing `LaundryOrder.id`.
+- Tax: `sales-tax-ca` — 8.5% on `LaundryOrder` line items where `branch.state == 'CA'`, posts to `2100 Sales Tax Payable`.
+- Close checklist: reconcile bank feed → post accrued detergent-supplier invoices not yet received → review A/R aging → lock period.
+
+## CRM: Sales Pipeline & Support (excerpt)
+
+- No B2B sales pipeline for individual customers; a lightweight one exists for corporate laundry contracts (hotels, gyms): `Lead -> Qualified -> Proposal Sent -> Won/Lost`.
+- Ticket entity: `Ticket`, states `Open -> In Progress -> Resolved -> Closed`. SLA: first response 2h, resolution 24h for `damaged-item` tickets (routed straight to `branch-manager`, never auto-resolved by an agent).
+- Customer 360 includes: order history, open tickets, loyalty tier, subscription status.
+
+## Inventory (excerpt)
+
+- Tracking method: `sku-quantity` for detergent/supplies. Reorder policy: "reorder to 30-day par when on-hand < 7-day average consumption."
+- Purchase order `PurchaseOrder`: `Draft -> Sent -> Received -> Closed`; receiving auto-updates `Stock` and posts an A/P journal entry.
+
+## HR & Payroll (excerpt)
+
+- Compensation: hourly wage for bay staff, small per-order piece-rate bonus for drivers.
+- Payroll cadence: biweekly. Pipeline: sum `Shift` hours + piece-rate from `LaundryOrder.driverId` → apply CA withholding → post to `5000 Payroll Expense` → disburse via Stripe payouts.
+
 ## Automations (excerpt)
 
 | ID | Trigger | Condition | Action | Owner |

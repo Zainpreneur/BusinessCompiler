@@ -23,7 +23,11 @@ this uniformity is the point, it's what makes "any platform" tractable:
   outbound charge creation, inbound webhook for payment status → drives the `Order`/`Invoice`
   state machine directly (link to the transitions defined in `02-data-model-workflows.md`).
 - **Accounting**: QuickBooks / Xero / Wave — bidirectional sync of invoices, expenses,
-  customers; typically nightly batch or on-invoice-created webhook.
+  customers; typically nightly batch or on-invoice-created webhook. This syncs an *external*
+  accounting product; if the business instead runs its books natively inside the compiled
+  system, see `16-accounting-finance.md`'s chart of accounts and ledger — the two are
+  alternatives, not both at once, unless the native ledger is deliberately mirrored out to an
+  external tool for a bookkeeper's convenience.
 - **E-commerce/POS**: Shopify / WooCommerce / Square POS / Toast — for any business that also
   sells online or has a physical POS, sync products/orders/inventory bidirectionally.
 - **Calendar**: Google Calendar / Outlook — bidirectional sync of `Appointment` so staff see

@@ -46,7 +46,7 @@ A workflow is an executable sequence, not a diagram for its own sake. For each w
 - Primary lifecycle workflow (from the ontology).
 - Cancellation / refund / return.
 - Staff onboarding and shift/schedule assignment, if the business has employees.
-- Inventory reorder, if the business holds stock.
+- Inventory reorder, if the business holds stock (deepen with `18-inventory-supply-chain.md`).
 - New customer onboarding / first-purchase.
 - Escalation/complaint handling.
 
