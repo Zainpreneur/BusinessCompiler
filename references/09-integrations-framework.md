@@ -41,6 +41,10 @@ this uniformity is the point, it's what makes "any platform" tractable:
   logs, media assets for the social suite).
 - **Analytics**: Google Analytics / Meta Pixel for attributing the marketing funnel's web-
   facing stages.
+- **IoT/telemetry**: sensor platforms or an MQTT broker feeding equipment signal data —
+  inbound, usually real-time or high-frequency polling; see `21-assets-equipment-iot.md` for
+  what to do with the data once it's flowing (preventive/predictive maintenance) and
+  `23-cross-platform-data-aggregation.md` for folding telemetry trends into analytics.
 - **Custom webhook**: for anything not covered above, a generic inbound/outbound webhook
   contract (payload schema keyed to a BIR entity, HMAC-signed) so a business-specific or
   future platform can be wired in without redesigning the framework — always include at least

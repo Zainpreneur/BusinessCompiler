@@ -79,6 +79,21 @@ the ledger (wages to `Payroll Expense`, withholdings to the relevant liability a
 name that link explicitly so the two modules don't silently duplicate or contradict each
 other's numbers.
 
+## Loyalty point liability
+
+`08-marketing-crm.md` treats loyalty as a near-default feature ("if the business benefits from
+repeat visits, define a loyalty structure... most do"), which means almost every compile with
+accounting *and* marketing hits the same modeling question: an issued-but-unredeemed loyalty
+point is a liability (the business owes future value), not a wash. Default to **accrual at
+earn**: when points are awarded, debit a `Loyalty Program Expense` (or reduce recognized
+revenue by the points' estimated redemption value, if the business's accounting approach
+prefers that) and credit a `Loyalty Points Payable` liability account; on redemption, debit
+`Loyalty Points Payable` and credit the revenue/discount line the redemption applies against.
+Add `Loyalty Points Payable` to the chart of accounts whenever `marketing.loyalty` is defined,
+and note the estimated point-liability value (points outstanding × redemption value per point)
+as a line in the balance sheet if one is compiled. Skip this entirely, and say so, only when
+the business has no loyalty program.
+
 ## Output format
 
 Chart of accounts table (code/name/type), ledger entity description with an example

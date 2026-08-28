@@ -70,15 +70,25 @@ Draw the agent roster from whichever of these are relevant — most real busines
 
 ## Guardrails as a first-class concept
 
-Every agent needs at least one guardrail beyond "be helpful." Common patterns to reuse:
+Every agent needs at least one guardrail beyond "be helpful." Write the actual number at the
+point you write the guardrail — don't write "escalates below a confidence threshold" and plan
+to fill in the number later, or during a QA pass; write "escalates below 70% confidence" the
+first time, every time. A guardrail that names a threshold without a value isn't a weaker
+version of a real guardrail, it's not a guardrail yet — nothing can be checked or enforced
+against "a threshold." Common patterns to reuse, each shown with the concreteness they need:
 
-- Spend/refund/discount ceilings requiring human approval above a threshold.
+- Spend/refund/discount ceilings requiring human approval above a threshold — e.g. "auto-
+  approves refunds up to $50; anything above requires `branch-manager` sign-off," not "requires
+  approval above a threshold."
 - Opt-out and consent respect (never contact a customer who has withdrawn consent — cross-
   reference `whatsapp.consentEntity`).
-- Confidence thresholds: below X, hand off to a human rather than guess (critical for
-  anything touching health, legal, or payment data).
-- Rate limits on outbound customer contact per agent, to avoid spammy automation stacking (an
-  agent and an automation both messaging the same customer the same day).
+- Confidence thresholds — e.g. "hands off to a human below 70% confidence, or immediately
+  regardless of confidence when the question touches health, legal, or payment data" — critical
+  for anything touching those domains.
+- Rate limits on outbound customer contact per agent, to avoid spammy automation stacking — e.g.
+  "at most 1 proactive message per customer per 24h across all agents/automations," not just
+  "avoid over-messaging" (an agent and an automation both messaging the same customer the same
+  day is exactly the failure this needs a real number to prevent).
 
 ## The Business Reasoning Layer
 

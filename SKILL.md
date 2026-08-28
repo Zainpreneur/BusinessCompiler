@@ -215,11 +215,14 @@ the opening so every page starts the same way regardless of which reference file
   only to explain non-obvious choices. The user should be able to hand the output to an
   engineering team or feed it back into Claude Code to scaffold real code.
 - **Write files, following the Output Package Structure.** For a full compile, write `bir.json`
-  and every compiled section into the clustered directory layout defined above, finishing with
-  `00-index.md` — rather than only printing to chat, so the result is a real deliverable — then
-  summarize what was produced and where. For a narrowed `/include-sections` compile, still use
-  the matching cluster folder(s) for whatever's produced, so a partial compile slots cleanly
-  into a full one later rather than needing to be reorganized.
+  and every compiled section into the clustered directory layout defined above — including
+  `07-delivery/qa-report.md` from Stage 4, which is a required deliverable of every full
+  compile, not an optional side effect of running the checklist — finishing with `00-index.md`
+  once everything else, QA report included, is done. Write to files rather than only printing
+  to chat, so the result is a real deliverable — then summarize what was produced and where.
+  For a narrowed `/include-sections` compile, still use the matching cluster folder(s) for
+  whatever's produced, so a partial compile slots cleanly into a full one later rather than
+  needing to be reorganized.
 - **Version and iterate.** Treat a follow-up like "add loyalty points" or "make it
   multi-branch" as a recompile of the affected BIR entities and the sections that depend on
   them, not a restart from scratch — re-read the existing output files first if they exist.

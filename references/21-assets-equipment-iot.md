@@ -44,11 +44,16 @@ Set `assets.predictiveMaintenance: true` and add a `predictive-maintenance` spec
 to `04-ai-agents.md` when telemetry is in place: it watches signal trends against each asset's
 normal operating range (not a fixed threshold — a slow drift over weeks reads very differently
 from a sudden spike, and the agent should distinguish them), flags anomalies before a hard
-failure occurs, and **auto-creates a maintenance work order** (linked to the affected `Asset`)
-rather than just alerting — pulling in required parts from `18-inventory-supply-chain.md`'s
-stock if the maintenance task consumes any. Guardrail: it can schedule and request parts
-autonomously, but taking equipment fully offline during business hours needs the responsible
-role's confirmation unless the asset is already failed/unsafe to keep running.
+failure occurs, and **auto-creates a maintenance work order** — a real `MaintenanceOrder`
+entity (`02-data-model-workflows.md` pattern: `assetId`, `triggeredBy` (`scheduled` or
+`predictive`, with the triggering signal noted), state machine `Requested -> Parts Pending ->
+Scheduled -> In Progress -> Completed`, `technicianId`, `partsUsed`) — rather than just
+flipping the asset's status or alerting with no tracked follow-through. Pulling in required
+parts from `18-inventory-supply-chain.md`'s stock if the maintenance task consumes any (a
+`Parts Pending` order auto-generates a `PurchaseOrder` if stock is short). Guardrail: it can
+create and schedule a `MaintenanceOrder` and request parts autonomously, but taking equipment
+fully offline during business hours needs the responsible role's confirmation unless the asset
+is already failed/unsafe to keep running.
 
 This is a case where the automation-vs-agent line from `05-automations-reminders.md` matters:
 a fixed preventive schedule is a plain automation (deterministic, no judgment needed);

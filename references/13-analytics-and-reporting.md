@@ -5,6 +5,15 @@ the live dashboards in `03-ui-dashboards.md`. Where a dashboard answers "what's 
 right now for my role," analytics answers "what's actually going on in the business, sliced
 however I need to see it" — the difference between a speedometer and a flight recorder.
 
+**Ownership vs. `14-business-views.md`**: this file owns *computing* a measure — defining a
+report's dimensions, its formula, where its data comes from. Views own *assembling* — bundling
+already-defined reports/KPIs into an audience-specific package with a cadence and medium. A
+tile that looks like it could belong in either (e.g. "occupancy by location, daily") is defined
+once here as a `report`, and a view simply lists that report's id in its `includes` — never
+redefine the same computation inside a view's own prose. If you find yourself unsure which
+file a number belongs in, the test is: does it need a formula/data source (→ here), or does it
+just need to be shown to the right audience at the right cadence (→ a view referencing this)?
+
 ## The reporting cube
 
 Define `analytics.dimensions` and `analytics.measures` once — every report is then just a

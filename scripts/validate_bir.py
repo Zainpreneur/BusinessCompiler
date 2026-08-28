@@ -164,6 +164,27 @@ def validate(bir: dict):
             warnings.append(f"View '{vid}'.audience '{aud}' doesn't match a role id — "
                              f"OK if it's a human label like 'board/investors', otherwise check for a typo")
 
+    # --- RBAC coverage: every role/entity pair actually used should have a permission row.
+    # A workflow actor operating on an entity, or an agent touching one, with no matching
+    # security.permissions entry is a real access-control gap, not just a style nit — this
+    # is the check a dogfood run found itself doing by hand 8 times before it was added here.
+    permissions = (bir.get("security") or {}).get("permissions", [])
+    if permissions or bir.get("security"):
+        covered = {(p.get("role"), p.get("entity")) for p in permissions}
+        required: dict[tuple, str] = {}
+        for w in bir.get("workflows", []):
+            for step in w.get("steps", []):
+                actor, entity = step.get("actor"), step.get("entity")
+                if actor and entity and actor not in ids["agents"]:
+                    required.setdefault((actor, entity), f"workflow '{w.get('id', '?')}' step '{step.get('id', '?')}'")
+        for a in bir.get("aiAgents", []):
+            for eid in a.get("entitiesTouched", []):
+                required.setdefault((a.get("id"), eid), f"agent '{a.get('id', '?')}'.entitiesTouched")
+        for (role, entity), source in required.items():
+            if (role, entity) not in covered:
+                warnings.append(f"No security.permissions row for role/agent '{role}' on entity '{entity}' "
+                                 f"(needed by {source}) — see references/10-security-rbac-abac.md")
+
     return errors, warnings
 
 

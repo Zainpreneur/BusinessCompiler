@@ -3,13 +3,22 @@
 Compiles `crm`. `08-marketing-crm.md` covers segmentation, campaigns, and loyalty — the
 marketing side of customer relationships. This section is the operational side: turning a
 lead into a paying customer through a real sales process, and keeping an existing customer
-supported afterward. Skip the pipeline half for a pure walk-in retail/service business with no
-sales cycle (a car wash doesn't need deal stages); keep the support half for almost everyone.
+supported afterward. Skip the full pipeline for a pure walk-in retail/service business with no
+sales cycle (a car wash doesn't need deal stages) — though see the note below on a lighter,
+lead-scoring-only middle path for a mostly-walk-in business with a genuine minority case that
+still benefits from follow-up. Keep the support half for almost everyone.
 
 ## Sales pipeline
 
 Relevant whenever a sale isn't instant — B2B, higher-ticket services, anything with a quote
-or proposal step. Define:
+or proposal step. Also relevant, in a lighter form, for a mostly-walk-in business that still
+has a real minority case needing follow-up (a mostly-instant retail/service business with an
+occasional large or custom order — multi-unit bookings, a bespoke request — that genuinely
+benefits from a human noticing and following up). Don't force the full pipeline onto that
+minority case: keep `leadScoring` signals (so the relevant lead surfaces at all) without
+defining `pipelineStages`/`dealEntity` — a flagged lead with a follow-up task is enough; add
+the full staged pipeline only once enough of the business's revenue actually moves through a
+multi-step sales process to justify tracking stages formally. For the full pipeline, define:
 
 - `crm.pipelineStages`: ordered stages a `Lead` or `Deal` (name `crm.dealEntity` in the BIR,
   usually `Deal` or `Opportunity`) moves through, e.g. `Lead -> Qualified -> Proposal Sent ->

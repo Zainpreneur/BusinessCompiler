@@ -52,6 +52,15 @@ in `02-data-model-workflows.md` — don't invent parallel event names), and `pay
 consumers fetch fresh detail via the API rather than trusting a possibly-stale payload for
 anything sensitive).
 
+Not every entity worth exposing a webhook for has a formal state machine — a `Stock`/counter
+entity crossing a low-stock threshold is a genuinely useful event (a partner's own reordering
+logic wants it) but isn't a `states`/`transitions` entity in `02-data-model-workflows.md`. For
+these, name `sourceTransition` as a documented field-crossing condition instead (e.g.
+`"quantity crosses below reorderThreshold"`) rather than forcing a state machine onto an
+entity that doesn't need one for its own sake — just be explicit that this event's trigger is
+a field condition, not a lifecycle transition, so it reads as a deliberate choice and not a
+missing state machine.
+
 Standard events worth exposing for most businesses: order/appointment created, status
 changed, completed, cancelled; payment received/failed; customer created; stock level
 crossed a threshold (useful for a partner's own reordering logic). Let subscribers pick which
