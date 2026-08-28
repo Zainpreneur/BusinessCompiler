@@ -121,6 +121,12 @@ padding the output.
 - **Version and iterate.** Treat a follow-up like "add loyalty points" or "make it
   multi-branch" as a recompile of the affected BIR entities and the sections that depend on
   them, not a restart from scratch — re-read the existing output files first if they exist.
+- **Validate before declaring done.** After writing `bir.json` for a full compile, run
+  `python3 scripts/validate_bir.py <output-dir>/bir.json`. It's a dependency-free linter that
+  catches exactly the failure mode the first rule above warns about — an agent, automation, or
+  workflow step referencing an entity/role/agent ID that doesn't actually exist in the BIR.
+  Fix anything it reports as an error before presenting the compile as finished; warnings
+  (naming convention, missing guardrails) are worth a glance but not blocking.
 
 ## Worked Example
 
