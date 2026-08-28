@@ -69,7 +69,10 @@
     "marketing": { "$ref": "#/definitions/marketingConfig" },
     "integrations": { "type": "array", "items": { "$ref": "#/definitions/integration" } },
     "security": { "$ref": "#/definitions/securityModel" },
-    "simulation": { "$ref": "#/definitions/simulationConfig" }
+    "simulation": { "$ref": "#/definitions/simulationConfig" },
+    "analytics": { "$ref": "#/definitions/analyticsConfig" },
+    "views": { "type": "array", "items": { "$ref": "#/definitions/view" } },
+    "knowledgeBase": { "$ref": "#/definitions/knowledgeBaseConfig" }
   },
   "definitions": {
     "entity": {
@@ -152,9 +155,11 @@
         "id": { "type": "string" },
         "name": { "type": "string" },
         "purpose": { "type": "string" },
-        "tier": { "type": "string", "enum": ["orchestrator", "specialist", "task"] },
+        "tier": { "type": "string", "enum": ["orchestrator", "advisor", "specialist", "task"], "description": "'advisor' agents do multi-step business reasoning (strategy, market research) rather than executing transactional work." },
         "reportsTo": { "type": "string", "description": "Agent id of the orchestrator, if any." },
-        "tools": { "type": "array", "items": { "type": "string" } },
+        "tools": { "type": "array", "items": { "type": "string" }, "description": "Reuse the standard tool vocabulary from references/04-ai-agents.md (e.g. web_search, financial_model, document_generator) so tool names stay comparable across agents." },
+        "reasoningPatterns": { "type": "array", "items": { "type": "string" }, "description": "Named structured-reasoning frameworks this agent applies, e.g. 'unit-economics', 'scenario-comparison', 'root-cause-5-whys' — see references/04-ai-agents.md." },
+        "memory": { "type": "string", "description": "What this agent remembers across invocations, if anything, e.g. 'per-customer conversation history, 90 days.' Omit for stateless agents." },
         "triggers": { "type": "array", "items": { "type": "string" } },
         "entitiesTouched": { "type": "array", "items": { "type": "string" } },
         "guardrails": { "type": "array", "items": { "type": "string" } },
@@ -235,6 +240,67 @@
       "properties": {
         "models": { "type": "array", "items": { "type": "string" } },
         "scenarios": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "analyticsConfig": {
+      "type": "object",
+      "properties": {
+        "dimensions": { "type": "array", "items": { "type": "string" }, "description": "Standard cube dimensions this business reports along, e.g. Time, Branch, Channel, Segment, Staff, Product." },
+        "measures": { "type": "array", "items": { "type": "string" }, "description": "Standard measures, e.g. Revenue, Orders, AOV, Margin, Utilization." },
+        "reports": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "measures", "dimensions"],
+            "properties": {
+              "id": { "type": "string" },
+              "name": { "type": "string" },
+              "measures": { "type": "array", "items": { "type": "string" } },
+              "dimensions": { "type": "array", "items": { "type": "string" } },
+              "cadence": { "type": "string", "enum": ["real-time", "daily", "weekly", "monthly", "on-demand"] }
+            }
+          }
+        },
+        "financialStatements": { "type": "array", "items": { "type": "string", "enum": ["profit-and-loss", "cash-flow", "balance-sheet", "ar-aging", "ap-aging"] } },
+        "cohorts": { "type": "array", "items": { "type": "string" } },
+        "healthScore": {
+          "type": "object",
+          "properties": {
+            "components": { "type": "array", "items": { "type": "object", "properties": { "kpi": { "type": "string" }, "weight": { "type": "number" } } } }
+          }
+        },
+        "anomalyRules": { "type": "array", "items": { "type": "string" } },
+        "scheduledDigests": { "type": "array", "items": { "type": "object", "properties": { "id": { "type": "string" }, "audience": { "type": "string" }, "cadence": { "type": "string" }, "channel": { "type": "string" } } } }
+      }
+    },
+    "view": {
+      "type": "object",
+      "required": ["id", "name", "audience"],
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "audience": { "type": "string", "description": "Role id, or a human label like 'board/investors'." },
+        "cadence": { "type": "string", "enum": ["real-time", "daily", "weekly", "monthly", "on-demand"] },
+        "medium": { "type": "string", "enum": ["in-app", "emailed-report", "whatsapp-digest", "pdf", "diagram"] },
+        "includes": { "type": "array", "items": { "type": "string" }, "description": "IDs of KPIs, reports, dashboards, or diagrams this view bundles." }
+      }
+    },
+    "knowledgeBaseConfig": {
+      "type": "object",
+      "properties": {
+        "documentTypes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "category": { "type": "string", "enum": ["customer-facing", "internal", "knowledge-article"] },
+              "generatedFrom": { "type": "array", "items": { "type": "string" }, "description": "Entity ids whose fields populate this document's template." }
+            }
+          }
+        },
+        "sources": { "type": "array", "items": { "type": "string" }, "description": "Where KB articles live, e.g. integration id of a storage/wiki tool." },
+        "groundsAgents": { "type": "array", "items": { "type": "string" }, "description": "Agent ids that must answer from this KB rather than free-inventing policy." }
       }
     }
   }

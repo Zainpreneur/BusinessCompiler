@@ -3,10 +3,10 @@
 Input: `/business-compiler Multi-branch laundry management with inventory, pickup/delivery,
 employees, accounting, CRM, automation and AI.`
 
-This excerpt shows calibration for depth/tone on the newer sections (agents, automations,
-WhatsApp, social, marketing, integrations). The full compile would also include the data
-model, UI/dashboards, security, simulation, and deployment guide files, omitted here for
-length.
+This excerpt shows calibration for depth/tone across the compiler's sections — agents and
+reasoning, automations, WhatsApp, analytics, views, social, marketing, knowledge, and
+integrations. The full compile would also include the data model, UI/dashboards, security,
+simulation, and deployment guide files, omitted here for length.
 
 ## BIR meta (excerpt)
 
@@ -45,6 +45,33 @@ length.
 - Triggers: nightly schedule; `Supply.quantity` crossing threshold.
 - Tools: `Supply.read`, `LaundryOrder.read` (7/30-day rolling), `automation.trigger('reorder-supply')`.
 - Guardrails: creates a reorder *task*, does not place supplier orders autonomously above $200 without `branch-manager` approval.
+
+**`strategy-advisor`** (advisor, reports to `ops-orchestrator`)
+- Purpose: answers open-ended questions from the owner ("should we open a 4th branch?", "why did margin drop last month?") with traceable, structured recommendations.
+- Reasoning patterns: `scenario-comparison` (branch expansion questions — runs the capacity/cash-flow simulators), `root-cause-5-whys` (margin/anomaly questions — pulls from `analytics.anomalyRules`), `unit-economics` (marketing spend questions).
+- Tools: `analytics.query`, `financial_model`, `web_search` (local market/competitor rent and pricing), `Branch.read`.
+- Memory: remembers prior recommendations for 12 months so it doesn't contradict a stance without flagging what changed.
+- Guardrails: never commits to a lease or hire — output is always a recommendation with confidence and a suggested cheap experiment (e.g. "run a 2-week pop-up before signing a lease"), routed to `owner`.
+- Escalates to: `owner`.
+
+## Analytics (excerpt)
+
+- Dimensions: Time, Branch, Channel, Segment. Measures: Revenue, Orders, AOV, Margin, Utilization.
+- Report `revenue-by-branch-weekly`: measures `[Revenue, Orders]` × dimensions `[Branch, Time]`, cadence weekly.
+- Financial statements generated: `profit-and-loss` (from `LaundryOrder`+`Invoice`), `ar-aging` (subscription customers on net-15 terms).
+- Health score: 40% revenue growth WoW, 30% utilization rate, 20% repeat-customer rate, 10% refund rate (inverted).
+- Anomaly rule: refund rate > 2 standard deviations above 8-week trailing average → alerts `branch-manager` and feeds `strategy-advisor`'s root-cause reasoning.
+
+## Views (excerpt)
+
+- **Executive View** (`owner`, daily digest via WhatsApp): health score, revenue-by-branch, any open anomalies — nothing else.
+- **Operations View** (`branch-manager`, real-time in-app): today's order queue by status, overdue-pickup list, staff coverage gaps.
+- **Field View** (`driver`, real-time mobile): today's delivery route only, one-tap "delivered" action, works offline and syncs on reconnect.
+
+## Knowledge Base (excerpt)
+
+- Document `service-receipt` (customer-facing, generated from `LaundryOrder`+`Invoice`).
+- KB article `stain-policy-faq` grounds `whatsapp-concierge` — the agent must cite this article rather than improvise an answer when a customer disputes a stain-removal result.
 
 ## Automations (excerpt)
 

@@ -1,6 +1,6 @@
 ---
 name: business-compiler
-description: Compiles any business idea or category into a complete, ready-to-deploy business operating system — data model, workflows, UI/dashboards, an AI agent workforce, an automation/reminder engine, WhatsApp Business integration, a social-media marketing suite, a marketing/CRM module, generic integrations with any third-party platform, RBAC/ABAC security, and a simulation/forecasting layer. Use this skill whenever the user describes a business, startup idea, or operational process (a shop, clinic, agency, SaaS, farm, restaurant, service business, franchise, etc.) and wants it turned into a system, a spec, an app, an ERP, a plan to build one, or "how would I run/automate this." Trigger even if they don't say "business compiler" explicitly — phrases like "I'm opening a...", "help me set up systems for my...", "I want to automate my business", "build me an ERP/CRM for...", or "/business-compiler" all qualify.
+description: Compiles any business idea or category into a complete, ready-to-deploy business operating system — data model, workflows, UI/dashboards, advanced multi-dimensional analytics and per-audience views, an AI agent workforce with a strategic reasoning layer, an automation/reminder engine, WhatsApp Business integration, a social-media marketing suite, a marketing/CRM module, a knowledge base/document module, generic integrations with any third-party platform, RBAC/ABAC security, and a simulation/forecasting layer. Use this skill whenever the user describes a business, startup idea, or operational process (a shop, clinic, agency, SaaS, farm, restaurant, service business, franchise, etc.) and wants it turned into a system, a spec, an app, an ERP, a plan to build one, "how would I run/automate this," or wants business analytics, reporting, dashboards, or an AI advisor for a business. Trigger even if they don't say "business compiler" explicitly — phrases like "I'm opening a...", "help me set up systems for my...", "I want to automate my business", "build me an ERP/CRM for...", or "/business-compiler" all qualify.
 ---
 
 # Business Compiler
@@ -8,9 +8,10 @@ description: Compiles any business idea or category into a complete, ready-to-de
 You are compiling a business — the way a compiler turns source code into an executable. The
 "source" is a business category plus whatever context the user gives you. The "target" is a
 full specification (and, where the user wants it, real scaffolded artifacts) of the systems
-that business needs to run: data, workflows, UI, an AI workforce, automations, marketing,
-integrations, security, and forecasting — all cross-referenced through one shared model so
-nothing you generate contradicts anything else.
+that business needs to run: data, workflows, UI, analytics, per-audience views, an AI
+workforce (including a strategic reasoning layer, not just task execution), automations,
+marketing, a knowledge base, integrations, security, and forecasting — all cross-referenced
+through one shared model so nothing you generate contradicts anything else.
 
 Treat every invocation as producing a real deliverable a founder or engineering team could
 hand off and build from — not a generic template with the business name swapped in. Depth
@@ -66,20 +67,24 @@ duplicate them here.
 | # | Section | Reference file | What it produces |
 |---|---------|-----------------|-------------------|
 | 1 | Data Model & Workflows | `references/02-data-model-workflows.md` | Entities, fields, relations, state machines, executable business workflows |
-| 2 | UI & Dashboards | `references/03-ui-dashboards.md` | Responsive forms, views, and KPI dashboards per role |
-| 3 | AI Agents | `references/04-ai-agents.md` | Exhaustive AI feature catalog + a hierarchy of specialized AI agents with tools, triggers, and guardrails |
-| 4 | Automations & Reminders | `references/05-automations-reminders.md` | Event→condition→action automation engine, scheduled reminders, escalation chains |
-| 5 | WhatsApp Integration | `references/06-whatsapp-integration.md` | WhatsApp Business API setup, message templates, conversational flows, opt-in/consent |
-| 6 | Social Media Suite | `references/07-social-media-suite.md` | Multi-platform content calendar, publishing, listening, analytics |
-| 7 | Marketing & CRM | `references/08-marketing-crm.md` | Funnels, segmentation, campaigns, lifecycle/email/SMS, loyalty |
-| 8 | Integrations Framework | `references/09-integrations-framework.md` | Generic "connect to any platform" connector spec (payments, accounting, maps, e-commerce, calendars, etc.) |
-| 9 | Security | `references/10-security-rbac-abac.md` | Roles, permissions, attribute-based policies, audit, compliance notes |
-| 10 | Simulation & Forecasting | `references/11-simulation-forecasting.md` | Demand/cashflow/staffing simulators, forecasting models, what-if scenarios |
-| 11 | Deployment Guide | `references/12-deployment-guide.md` | Step-by-step path from spec to running system, stack choices, rollout plan |
+| 2 | UI & Dashboards | `references/03-ui-dashboards.md` | Responsive forms, views, and live KPI dashboards per role |
+| 3 | Analytics & Reporting | `references/13-analytics-and-reporting.md` | Multi-dimensional reporting cube, financial statements, cohort/retention analysis, benchmarking, anomaly detection, a business health score |
+| 4 | Business Views | `references/14-business-views.md` | Per-audience bundles (Executive, Operations, Financial, CRM, Team, Growth, Technical/diagrams, Board, Field) with cadence and medium |
+| 5 | AI Agents & Reasoning | `references/04-ai-agents.md` | An AI agent hierarchy (orchestrator/advisor/specialist/task) with tools, triggers, guardrails, and a strategic business-reasoning layer (structured decision frameworks, not just task execution) |
+| 6 | Automations & Reminders | `references/05-automations-reminders.md` | Event→condition→action automation engine, scheduled reminders, escalation chains |
+| 7 | WhatsApp Integration | `references/06-whatsapp-integration.md` | WhatsApp Business API setup, message templates, conversational flows, opt-in/consent |
+| 8 | Social Media Suite | `references/07-social-media-suite.md` | Multi-platform content calendar, publishing, listening, analytics |
+| 9 | Marketing & CRM | `references/08-marketing-crm.md` | Funnels, segmentation, campaigns, lifecycle/email/SMS, loyalty |
+| 10 | Knowledge Base & Documents | `references/15-knowledge-and-documents.md` | Document templates (invoices, contracts, SOPs), a knowledge base that grounds customer-facing agents |
+| 11 | Integrations Framework | `references/09-integrations-framework.md` | Generic "connect to any platform" connector spec (payments, accounting, maps, e-commerce, calendars, etc.) |
+| 12 | Security | `references/10-security-rbac-abac.md` | Roles, permissions, attribute-based policies, audit, compliance notes |
+| 13 | Simulation & Forecasting | `references/11-simulation-forecasting.md` | Demand/cashflow/staffing simulators, forecasting models, what-if scenarios |
+| 14 | Deployment Guide | `references/12-deployment-guide.md` | Step-by-step path from spec to running system, stack choices, rollout plan |
 
-Sections 3–8 are the "exhaustive AI / automation / integration" layer the compiler is known
-for — never skip these by default even for a simple-sounding business; a one-location laundromat
-still benefits from a reminder agent and a WhatsApp pickup-ready notification.
+Sections 3–10 are the "exhaustive AI / analytics / automation / integration" layer the
+compiler is known for — never skip these by default even for a simple-sounding business; a
+one-location laundromat still benefits from a reminder agent, a WhatsApp pickup-ready
+notification, and a weekly owner digest.
 
 ## Cross-Cutting Rules
 
@@ -100,10 +105,11 @@ still benefits from a reminder agent and a WhatsApp pickup-ready notification.
   only to explain non-obvious choices. The user should be able to hand the output to an
   engineering team or feed it back into Claude Code to scaffold real code.
 - **Write files.** For a full compile, write the BIR and each compiled section to files (e.g.
-  a `<business-slug>/` output directory: `bir.json`, `data-model.md`, `ai-agents.md`,
-  `automations.md`, `whatsapp.md`, `social-media.md`, `marketing.md`, `integrations.md`,
-  `security.md`, `simulation.md`, `deployment-guide.md`) rather than only printing to chat, so
-  the result is a real deliverable — then summarize what was produced and where.
+  a `<business-slug>/` output directory: `bir.json`, `data-model.md`, `dashboards.md`,
+  `analytics.md`, `views.md`, `ai-agents.md`, `automations.md`, `whatsapp.md`,
+  `social-media.md`, `marketing.md`, `knowledge-base.md`, `integrations.md`, `security.md`,
+  `simulation.md`, `deployment-guide.md`) rather than only printing to chat, so the result is
+  a real deliverable — then summarize what was produced and where.
 - **Version and iterate.** Treat a follow-up like "add loyalty points" or "make it
   multi-branch" as a recompile of the affected BIR entities and the sections that depend on
   them, not a restart from scratch — re-read the existing output files first if they exist.

@@ -12,6 +12,12 @@ Organize as a small org chart, not a flat list:
   Owns understanding the day's state across the business and routing work to specialists. Not
   strictly required for a solo/small-team business — skip it if there's only 1–2 specialist
   agents total and add it back once the business scales past ~4 agents.
+- **Advisor agents** (`tier: advisor`) — do multi-step business *reasoning* rather than
+  executing transactional work: a `strategy-advisor` that answers open-ended questions
+  ("should we open a second location?"), synthesizes analytics with market context, and
+  produces structured recommendations. See "The Business Reasoning Layer" below — this tier
+  is what separates a compiler that automates tasks from one that actually reasons about the
+  business.
 - **Specialist agents** (`tier: specialist`) — own a domain end to end (e.g.
   `inventory-forecaster`, `whatsapp-concierge`, `collections-agent`, `scheduling-agent`,
   `review-response-agent`, `intake-triage-agent`). Most of the exhaustive value lives here —
@@ -64,9 +70,88 @@ Every agent needs at least one guardrail beyond "be helpful." Common patterns to
 - Rate limits on outbound customer contact per agent, to avoid spammy automation stacking (an
   agent and an automation both messaging the same customer the same day).
 
+## The Business Reasoning Layer
+
+Task and specialist agents execute; this layer is about *judgment* — the difference between
+"send the reminder" and "figure out whether we should hire another technician." Every compile
+with `meta.scale` beyond solo should include at least one advisor agent, typically
+`strategy-advisor`, reporting to the orchestrator if one exists.
+
+**What an advisor agent does that a specialist doesn't:**
+- Answers open-ended natural-language business questions by pulling from the BIR, the
+  analytics layer (`13-analytics-and-reporting.md`), the simulation models
+  (`11-simulation-forecasting.md`), and — via the `web_search`/`market_research` tools below —
+  external context the business's own data can't provide (competitor pricing, local market
+  conditions, industry trends).
+- Produces a **structured recommendation**, not just an answer: the question restated, the
+  reasoning pattern used, the data it drew on, the recommendation, a confidence level, and the
+  concrete next step. A bare opinion isn't useful to a founder deciding whether to spend money;
+  a traceable one is.
+- Still respects guardrails: an advisor recommends, it doesn't unilaterally execute anything
+  irreversible (opening a branch, changing prices, firing staff) — that's always handed to
+  `escalatesTo`.
+
+### Reasoning patterns (`aiAgent.reasoningPatterns`)
+
+Name the structured frameworks an advisor (or a specialist making a non-trivial judgment call)
+applies, so its reasoning is reproducible rather than ad hoc. Reuse these standard patterns
+rather than inventing new ones per business:
+
+- **`unit-economics`** — CAC vs. LTV, contribution margin per order/customer; the default
+  lens for "should we spend more on X" questions.
+- **`scenario-comparison`** — run 2+ named scenarios through the simulation models
+  (`11-simulation-forecasting.md`) and compare outcomes side by side rather than answering
+  from intuition alone.
+- **`root-cause-5-whys`** — for "why did X happen" questions (a bad week, a spike in
+  refunds), chain from the symptom to the underlying cause using the analytics/anomaly data
+  before recommending a fix.
+- **`swot`** — for genuinely open strategic questions (new market, new service line) where
+  there isn't yet enough of the business's own data to run a quantitative scenario.
+- **`decision-matrix`** — when comparing 3+ discrete options (which POS system, which branch
+  location) against weighted criteria.
+
+Each reasoning pattern should end in a recommendation with a stated confidence and, where the
+decision is reversible and cheap to test, a suggested small experiment before committing fully
+— advisors should default to "here's a cheap way to find out" over "here's my best guess," when
+one exists.
+
+## Standard tool vocabulary
+
+Keep agent `tools` lists concrete and drawn from a shared vocabulary rather than each agent
+inventing its own naming — this makes the agent roster auditable at a glance and maps cleanly
+onto real implementation (Claude Agent SDK tool definitions, MCP connectors already available
+in this environment, or custom functions). Reuse these names:
+
+| Tool | Purpose |
+|---|---|
+| `<Entity>.read` / `<Entity>.update` / `<Entity>.create` | Direct BIR entity access, scoped per agent |
+| `web_search` | External/market research — competitor info, industry benchmarks, local conditions |
+| `financial_model` | Runs the simulation models from `11-simulation-forecasting.md` with given inputs |
+| `analytics.query` | Ad-hoc cube query against `13-analytics-and-reporting.md`'s dimensions/measures |
+| `document_generator` | Renders a document from a template + entity data (`15-knowledge-and-documents.md`) |
+| `knowledge_base.search` | Retrieves grounding articles before answering a policy/FAQ question |
+| `whatsapp.send` / `email.send` / `sms.send` | Outbound messaging on a specific channel |
+| `automation.trigger` | Fires a named automation from `05-automations-reminders.md` |
+| `notify_role` | Escalates/alerts a human role without taking further action |
+| `calendar.read` / `calendar.write` | Scheduling, via the calendar integration |
+| `<integration>.sync` | Named third-party sync from `09-integrations-framework.md` |
+
+Add a business-specific tool only when none of the above fits — and when you do, keep the same
+`noun.verb` naming convention.
+
+## Memory
+
+Most task/specialist agents should be stateless (each invocation is self-contained) — it's
+simpler and easier to audit. Set `aiAgent.memory` only where statefulness genuinely earns its
+keep: a concierge agent remembering a customer's conversation history within a support window,
+or the `strategy-advisor` remembering past recommendations so it doesn't contradict itself
+quarter to quarter. State what's remembered and for how long — unbounded, undefined memory is
+a privacy and drift risk, not a feature.
+
 ## Output format
 
-Markdown org-chart-style: orchestrator first (if present), then specialists grouped by
-domain, then task agents. For each, a compact block: Purpose / Triggers / Tools / Touches /
-Guardrails / Escalates to. Close with a short "why this roster" paragraph tying the agent
-count and mix back to `meta.scale`.
+Markdown org-chart-style: orchestrator first (if present), then advisor agents, then
+specialists grouped by domain, then task agents. For each, a compact block: Purpose /
+Triggers / Tools / Reasoning patterns (advisors only) / Touches / Guardrails / Memory (if any)
+/ Escalates to. Close with a short "why this roster" paragraph tying the agent count and mix
+back to `meta.scale`.
