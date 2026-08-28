@@ -34,7 +34,7 @@ Every full compile produces the same clustered directory layout regardless of bu
 ├── 00-index.md         — executive summary + table of contents, written last
 ├── bir.json             — the machine-readable root every section compiles from
 ├── 01-foundation/        — data model, dashboards, security
-├── 02-intelligence/      — analytics, views, AI agents, simulation
+├── 02-intelligence/      — analytics, views, AI agents, simulation, data aggregation
 ├── 03-operations/        — automations, inventory, assets/IoT, HR
 ├── 04-growth/            — WhatsApp, social media, marketing, CRM
 ├── 05-finance/           — accounting

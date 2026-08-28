@@ -1,6 +1,6 @@
 ---
 name: business-compiler
-description: Compiles any business idea or category into a complete, ready-to-deploy business operating system — data model, workflows, UI/dashboards, advanced multi-dimensional analytics and per-audience views, an AI agent workforce with a strategic reasoning layer (plus a voice/omnichannel agent and a system-health meta-agent), an automation/reminder engine, WhatsApp Business integration, a social-media marketing suite, advanced marketing (ads, A/B testing, multi-touch attribution, drip sequences), a full CRM (sales pipeline, lead scoring, support ticketing/SLAs, customer-360), native double-entry accounting & finance (chart of accounts, ledger, multi-currency, tax, budgets, period close), inventory & supply chain, HR & payroll, asset/equipment tracking with IoT and predictive maintenance, a knowledge base/document module, generic integrations with any third-party platform PLUS the business's own outbound API and webhook platform for other systems to integrate into it, RBAC/ABAC security, a simulation/forecasting layer, and a final comprehensive QA pass that checks business logic, AI logic, and cross-module consistency before the compile is called done. Use this skill whenever the user describes a business, startup idea, or operational process (a shop, clinic, agency, SaaS, farm, restaurant, service business, franchise, etc.) and wants it turned into a system, a spec, an app, an ERP, a plan to build one, "how would I run/automate this," or wants business analytics, reporting, dashboards, accounting, CRM, an API, or an AI advisor for a business. Trigger even if they don't say "business compiler" explicitly — phrases like "I'm opening a...", "help me set up systems for my...", "I want to automate my business", "build me an ERP/CRM for...", or "/business-compiler" all qualify.
+description: Compiles any business idea or category into a complete, ready-to-deploy business operating system — data model, workflows, UI/dashboards, advanced multi-dimensional analytics and per-audience views, cross-platform data aggregation that pulls data from every integrated platform into advanced blended analysis (true ROAS, full-funnel conversion, downtime cost, partner benchmarking), an AI agent workforce with a strategic reasoning layer (plus a voice/omnichannel agent and a system-health meta-agent), an automation/reminder engine, WhatsApp Business integration, a social-media marketing suite, advanced marketing (ads, A/B testing, multi-touch attribution, drip sequences), a full CRM (sales pipeline, lead scoring, support ticketing/SLAs, customer-360), native double-entry accounting & finance (chart of accounts, ledger, multi-currency, tax, budgets, period close), inventory & supply chain, HR & payroll, asset/equipment tracking with IoT and predictive maintenance, a knowledge base/document module, generic integrations with any third-party platform PLUS the business's own outbound API and webhook platform for other systems to integrate into it, RBAC/ABAC security, a simulation/forecasting layer, and a final comprehensive QA pass that checks business logic, AI logic, and cross-module consistency before the compile is called done — all written into one consistently structured, clustered output package regardless of business niche. Use this skill whenever the user describes a business, startup idea, or operational process (a shop, clinic, agency, SaaS, farm, restaurant, service business, franchise, etc.) and wants it turned into a system, a spec, an app, an ERP, a plan to build one, "how would I run/automate this," or wants business analytics, reporting, dashboards, accounting, CRM, an API, or an AI advisor for a business. Trigger even if they don't say "business compiler" explicitly — phrases like "I'm opening a...", "help me set up systems for my...", "I want to automate my business", "build me an ERP/CRM for...", or "/business-compiler" all qualify.
 ---
 
 # Business Compiler
@@ -62,7 +62,11 @@ entity that the data model and the dashboard use. See `references/01-ontology-an
 For each section in scope (all of them, unless `/include-sections` narrows it), read the
 matching reference file and produce that section from the BIR. The reference files contain
 the detailed patterns, checklists, and worked structures — SKILL.md intentionally does not
-duplicate them here.
+duplicate them here. Compile in cluster order (Foundation → Intelligence → Operations →
+Growth → Finance → Platform), with one exception: Cross-Platform Data Aggregation
+(`references/23-cross-platform-data-aggregation.md`) compiles *last*, after Platform, because
+it needs to know every integration and API partner before it can define what external data
+feeds analytics — see the Section Catalog's dagger note.
 
 ### Stage 4 — Comprehensive QA
 
@@ -106,8 +110,15 @@ it live" at once.
 | **Platform** | Knowledge Base & Documents | `references/15-knowledge-and-documents.md` | `06-platform/knowledge-base.md` | Document templates (invoices, contracts, SOPs), a knowledge base that grounds customer-facing agents |
 | **Platform** | Integrations Framework | `references/09-integrations-framework.md` | `06-platform/integrations.md` | Generic "connect to any platform" connector spec — this business *consuming* other platforms |
 | **Platform** | Platform API & Webhooks | `references/20-api-and-webhooks.md` | `06-platform/api-webhooks.md` | The mirror image of Integrations — this business's own API/webhook surface for *other systems to integrate into it* |
+| **Intelligence**† | Cross-Platform Data Aggregation | `references/23-cross-platform-data-aggregation.md` | `02-intelligence/data-aggregation.md` | Pulls data from every integration and platform-API partner into the analytics cube, plus the advanced cross-source analyses (true ROAS, full-funnel conversion, downtime cost, partner benchmarking) only possible once sources are blended |
 | **Delivery** | Deployment Guide | `references/12-deployment-guide.md` | `07-delivery/deployment-guide.md` | Step-by-step path from spec to running system, stack choices, rollout plan |
 | **Delivery** | Comprehensive QA (Stage 4, always last) | `references/22-qa-and-completeness.md` | `07-delivery/qa-report.md` | Business/AI-logic/cross-module checklist results and what was fixed |
+
+† Files under `02-intelligence/` like everything else in that cluster, but — unlike every
+other section — **compile it out of cluster order, last in Stage 3** (positioned in the table
+right after Platform, above): it depends on knowing every integration and API partner, which
+aren't compiled until the Platform cluster. Revisit `analytics.md` at this point too if the
+aggregation work surfaces a cross-source measure worth promoting into the main reporting cube.
 
 **Foundation, Intelligence, Operations, and Growth are never skipped by default**, even for a
 simple-sounding business — a one-location laundromat still gets a reminder agent, a WhatsApp
@@ -118,6 +129,9 @@ payroll) — say so rather than padding the output. Within **Platform**, Platfor
 is worth skipping only for a genuinely single-operator business with no plausible third-party
 integrators; **Finance** (native accounting) is worth skipping only when the business has
 firmly committed to an external accounting product instead (see `09-integrations-framework.md`).
+Cross-Platform Data Aggregation should be brief (a short paragraph, not the full treatment)
+for a business with only one or two integrations — there isn't much to aggregate yet, and
+that's fine; say so rather than manufacturing analysis the data doesn't support.
 
 ## Output Package Structure
 
@@ -131,7 +145,7 @@ one working from these files alone) can navigate it without re-reading everythin
 ├── 00-index.md              — master table of contents + executive summary (see below)
 ├── bir.json                 — the BIR: the machine-readable root everything else compiles from
 ├── 01-foundation/           — data model, dashboards, security: the base layer everything else depends on
-├── 02-intelligence/         — analytics, views, AI agents, simulation: the business's "brain"
+├── 02-intelligence/         — analytics, views, AI agents, simulation, cross-platform data aggregation: the "brain"
 ├── 03-operations/           — automations, inventory, assets/IoT, HR: day-to-day running
 ├── 04-growth/               — WhatsApp, social, marketing, CRM: the customer-facing engine
 ├── 05-finance/              — accounting: the ledger

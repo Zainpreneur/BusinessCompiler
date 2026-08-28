@@ -153,5 +153,11 @@ excerpt inlines everything in one file purely for readability here.
 | Google Maps | maps-logistics | outbound | `DeliveryRoute` | api-key |
 | Google Calendar | calendar | bidirectional | `Shift` | oauth2 |
 
+## Cross-Platform Data Aggregation (excerpt)
+
+- External sources: Google Ads (spend + impressions, daily sync, joins to Time/Branch via `LaundryOrder.promoCode` UTM tag), corporate-partner API pushes from hotel/gym contracts (their own booking volume, weekly).
+- Cross-source analysis `blended-roas`: Google Ads spend ÷ revenue from `LaundryOrder`s carrying that campaign's promo code — answers whether the spring promo actually paid for itself, not just what Google's own dashboard reported.
+- Freshness note: ad spend lags a day behind native order data — the Growth View (`14-business-views.md`) shows Google Ads figures with an "as of yesterday" label rather than implying same-day.
+
 This is the level of specificity every full compile should hit — real entity names, real
 trigger conditions, real guardrail thresholds, nothing generic.

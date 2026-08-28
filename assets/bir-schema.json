@@ -281,7 +281,34 @@
           }
         },
         "anomalyRules": { "type": "array", "items": { "type": "string" } },
-        "scheduledDigests": { "type": "array", "items": { "type": "object", "properties": { "id": { "type": "string" }, "audience": { "type": "string" }, "cadence": { "type": "string" }, "channel": { "type": "string" } } } }
+        "scheduledDigests": { "type": "array", "items": { "type": "object", "properties": { "id": { "type": "string" }, "audience": { "type": "string" }, "cadence": { "type": "string" }, "channel": { "type": "string" } } } },
+        "externalSources": {
+          "type": "array",
+          "description": "Data pulled in from integrations/the platform API and blended into the analytics cube alongside native BIR data — see references/23-cross-platform-data-aggregation.md.",
+          "items": {
+            "type": "object",
+            "required": ["integrationId", "contributes"],
+            "properties": {
+              "integrationId": { "type": "string", "description": "id from `integrations`, or a `platformApi` webhook/partner source." },
+              "contributes": { "type": "array", "items": { "type": "string" }, "description": "What this source adds to the cube, e.g. 'ad spend', 'impressions', 'GA conversion funnel', 'IoT telemetry trend'." },
+              "joinsToDimensions": { "type": "array", "items": { "type": "string" }, "description": "Which analytics.dimensions this source's data keys against, e.g. Time, Branch, Channel." },
+              "freshness": { "type": "string", "description": "How stale this source can be, e.g. 'synced nightly, up to 24h behind native data'." }
+            }
+          }
+        },
+        "crossSourceAnalyses": {
+          "type": "array",
+          "description": "Analysis only possible by combining 2+ sources (native BIR data plus one or more externalSources) — the payoff of aggregation, not just the plumbing.",
+          "items": {
+            "type": "object",
+            "required": ["id", "sourcesUsed", "answers"],
+            "properties": {
+              "id": { "type": "string" },
+              "sourcesUsed": { "type": "array", "items": { "type": "string" } },
+              "answers": { "type": "string", "description": "The question this analysis actually answers, e.g. 'true blended ROAS across ad platforms vs. attributed revenue'." }
+            }
+          }
+        }
       }
     },
     "view": {
